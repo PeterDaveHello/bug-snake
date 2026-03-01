@@ -1,0 +1,51 @@
+{
+  "name": "bug-buster-snake",
+  "version": "1.0.0",
+  "description": "Vanilla JS Snake Game",
+  "type": "module",
+  "main": "scripts/main.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "npm run test:core",
+    "check": "npm run check:js && npm run check:i18n && npm run test:core && npm run lint",
+    "check:quality": "npm run lint && npm run lint:md && npm run format:check",
+    "check:i18n": "node scripts/tools/check-i18n.js",
+    "check:js": "tsc --noEmit --allowJs --checkJs --target ESNext --moduleResolution node --module esnext scripts/core/*.js scripts/*.js scripts/ui/*.js scripts/tests/*.js scripts/tools/*.js",
+    "test:core": "node scripts/tests/core-test.js",
+    "lint": "npm run lint:js && npm run lint:css && npm run lint:html",
+    "lint:js": "eslint \"scripts/**/*.js\" \"sw.js\"",
+    "lint:css": "stylelint \"styles/**/*.css\"",
+    "lint:html": "html-validate \"index.html\"",
+    "lint:md": "markdownlint-cli2",
+    "lint:fix": "eslint \"scripts/**/*.js\" \"sw.js\" --fix && stylelint \"styles/**/*.css\" --fix && prettier --write .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "snake",
+    "game",
+    "canvas",
+    "vanilla-js",
+    "web-game",
+    "es-modules"
+  ],
+  "author": "Peter Dave Hello",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PeterDaveHello/bug-snake.git"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.9",
+    "eslint": "^8.57.0",
+    "eslint-plugin-import": "^2.29.1",
+    "html-validate": "^10.6.0",
+    "markdownlint-cli2": "^0.18.1",
+    "prettier": "^3.6.2",
+    "stylelint": "^17.0.0",
+    "stylelint-config-recommended": "^18.0.0",
+    "typescript": "^5.3.3"
+  }
+}

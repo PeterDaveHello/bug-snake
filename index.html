@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta
+      name="description"
+      content="Play SerpentOS: Bug Buster Snake, a modern Snake game built with Vanilla JS, Canvas 2D, and Web Audio."
+    >
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <link rel="canonical" href="https://peterdavehello.github.io/bug-snake/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="SerpentOS: Bug Buster Snake">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="SerpentOS: Bug Buster Snake">
+    <meta
+      property="og:description"
+      content="Play SerpentOS: Bug Buster Snake, a modern Snake game built with Vanilla JS, Canvas 2D, and Web Audio."
+    >
+    <meta property="og:url" content="https://peterdavehello.github.io/bug-snake/">
+    <meta property="og:image" content="https://peterdavehello.github.io/bug-snake/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="SerpentOS: Bug Buster Snake">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="SerpentOS: Bug Buster Snake">
+    <meta
+      name="twitter:description"
+      content="Play SerpentOS: Bug Buster Snake, a modern Snake game built with Vanilla JS, Canvas 2D, and Web Audio."
+    >
+    <meta name="twitter:image" content="https://peterdavehello.github.io/bug-snake/og-image.png">
+    <meta name="twitter:image:alt" content="SerpentOS: Bug Buster Snake">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": "SerpentOS: Bug Buster Snake",
+        "url": "https://peterdavehello.github.io/bug-snake/",
+        "description": "Play SerpentOS: Bug Buster Snake, a modern Snake game built with Vanilla JS, Canvas 2D, and Web Audio.",
+        "applicationCategory": "Game",
+        "operatingSystem": "Web Browser",
+        "genre": ["Arcade", "Snake"],
+        "inLanguage": [
+          "ar-SA",
+          "bn-BD",
+          "de-DE",
+          "en-US",
+          "es-ES",
+          "fa-IR",
+          "fr-FR",
+          "hi-IN",
+          "id-ID",
+          "it-IT",
+          "ja-JP",
+          "ko-KR",
+          "nl-NL",
+          "pl-PL",
+          "pt-BR",
+          "ru-RU",
+          "th-TH",
+          "tr-TR",
+          "ur-PK",
+          "vi-VN",
+          "zh-CN",
+          "zh-TW"
+        ],
+        "author": {
+          "@type": "Person",
+          "name": "Peter Dave Hello"
+        },
+        "isAccessibleForFree": true,
+        "codeRepository": "https://github.com/PeterDaveHello/bug-snake/"
+      }
+    </script>
+    <title>SerpentOS: Bug Buster Snake</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="styles/main.css">
+  </head>
+  <body>
+    <div id="game-container">
+      <div id="hud">
+        <div class="hud-item">
+          <span id="hud-score-label" data-i18n="ui.score">Score</span>:
+          <span id="hud-score-val">0</span>
+        </div>
+        <div class="hud-item">
+          <span id="hud-high-label" data-i18n="ui.highScore">Best</span>:
+          <span id="hud-high-val">0</span>
+        </div>
+        <div class="hud-item">
+          <span id="hud-mode-label" data-i18n="ui.mode">Mode</span>:
+          <span id="hud-mode-val">Classic Infinite</span>
+        </div>
+        <div class="hud-item">
+          <span id="hud-length-label" data-i18n="ui.length">Length</span>:
+          <span id="hud-length-val">3</span>
+        </div>
+        <div class="hud-item">
+          <span id="hud-speed-label" data-i18n="ui.speed">Speed</span>:
+          <span id="hud-speed-val">6</span>
+        </div>
+        <div class="hud-item">
+          <span id="hud-ai-label" data-i18n="ui.ai">AI</span>: <span id="hud-ai-val">Off</span>
+        </div>
+        <div class="hud-item" id="hud-level-container">
+          <span id="hud-level-label" data-i18n="ui.level">Level</span>:
+          <span id="hud-level-val">1</span>
+        </div>
+        <div class="hud-item" id="hud-time-container" style="display: none">
+          <span id="hud-time-label" data-i18n="ui.time">Time</span>:
+          <span id="hud-time-val">0</span>
+        </div>
+        <div class="hud-item hud-action">
+          <button
+            id="btn-hud-settings"
+            class="hud-btn"
+            type="button"
+            style="margin-right: 5px"
+            aria-label="Settings"
+          >
+            Settings
+          </button>
+          <button
+            id="btn-hud-pause"
+            class="hud-btn"
+            type="button"
+            style="margin-right: 5px"
+            aria-label="Pause"
+          >
+            Pause
+          </button>
+          <button
+            id="btn-hud-legend"
+            class="hud-btn"
+            type="button"
+            style="margin-right: 5px"
+            aria-label="Legend"
+          >
+            Legend
+          </button>
+          <button id="btn-hud-restart" class="hud-btn" type="button" aria-label="Restart">
+            Restart
+          </button>
+        </div>
+      </div>
+
+      <canvas
+        id="game-canvas"
+        role="application"
+        aria-label="Snake game — use arrow keys or D-pad to control"
+      ></canvas>
+      <div id="legend-panel" class="legend-panel">
+        <div class="legend-title" id="legend-title" data-i18n="ui.legendTitle">Legend</div>
+        <div class="legend-section">
+          <div class="legend-section-title" id="legend-food-title" data-i18n="panel.foodItems">
+            Foods
+          </div>
+          <div class="legend-row">
+            <canvas class="legend-icon" data-type="roach" width="32" height="32"></canvas
+            ><span id="legend-roach" data-i18n="item.roach">Roach</span>
+          </div>
+          <div class="legend-row">
+            <canvas class="legend-icon" data-type="ant" width="32" height="32"></canvas
+            ><span id="legend-ant" data-i18n="item.ant">Ant</span>
+          </div>
+          <div class="legend-row">
+            <canvas class="legend-icon" data-type="mosquito" width="32" height="32"></canvas
+            ><span id="legend-mosquito" data-i18n="item.mosquito">Mosquito</span>
+          </div>
+          <div class="legend-row">
+            <canvas class="legend-icon" data-type="egg" width="32" height="32"></canvas
+            ><span id="legend-egg" data-i18n="item.egg">Egg</span>
+          </div>
+          <div class="legend-row">
+            <canvas class="legend-icon" data-type="mouse" width="32" height="32"></canvas
+            ><span id="legend-mouse" data-i18n="item.mouse">Mouse</span>
+          </div>
+        </div>
+        <div class="legend-section">
+          <div class="legend-section-title" id="legend-hazard-title" data-i18n="panel.dangerItems">
+            Hazards
+          </div>
+          <div class="legend-row">
+            <canvas class="legend-icon" data-type="trash" width="32" height="32"></canvas
+            ><span id="legend-trash" data-i18n="item.trash">Trash</span>
+          </div>
+          <div class="legend-row">
+            <canvas class="legend-icon" data-type="poison" width="32" height="32"></canvas
+            ><span id="legend-poison" data-i18n="item.poison">Poison</span>
+          </div>
+        </div>
+        <div class="legend-section">
+          <div class="legend-section-title" id="legend-obstacle-title" data-i18n="ui.obstacles">
+            Obstacles
+          </div>
+          <div class="legend-row">
+            <canvas class="legend-icon" data-type="wall" width="32" height="32"></canvas
+            ><span id="legend-obstacle" data-i18n="ui.wall">Wall</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="controls-panel"></div>
+
+      <div id="mobile-controls">
+        <div class="dpad-row">
+          <button id="btn-up" class="dpad-btn" type="button" aria-label="Move Up">▲</button>
+        </div>
+        <div class="dpad-row">
+          <button id="btn-left" class="dpad-btn" type="button" aria-label="Move Left">◀</button>
+          <button id="btn-down" class="dpad-btn" type="button" aria-label="Move Down">▼</button>
+          <button id="btn-right" class="dpad-btn" type="button" aria-label="Move Right">▶</button>
+        </div>
+        <div id="mobile-actions">
+          <button id="btn-mobile-pause" class="mobile-btn" type="button" aria-label="Pause">
+            Pause
+          </button>
+          <button id="btn-mobile-legend" class="mobile-btn" type="button" aria-label="Legend">
+            Legend
+          </button>
+          <button id="btn-mobile-restart" class="mobile-btn" type="button" aria-label="Restart">
+            Restart
+          </button>
+        </div>
+      </div>
+
+      <section id="seo-content" aria-label="Game information">
+        <h2 data-i18n="ui.aboutTitle">About</h2>
+        <p data-i18n="ui.aboutDescription">
+          A modern Snake game built with Vanilla JS, Canvas 2D, and Web Audio. No build tools required.
+        </p>
+
+        <h3 data-i18n="ui.guideTitle">Quick Start</h3>
+        <ul>
+          <li data-i18n="ui.guideMove">Move: Arrow Keys / WASD (Swipe on mobile)</li>
+          <li data-i18n="ui.guidePause">Pause: Press Esc or tap Pause</li>
+          <li data-i18n="ui.guideRestart">Restart: R / Randomize: Shift+R</li>
+          <li data-i18n="ui.guideBoost">Boost: Hold Space</li>
+          <li data-i18n="ui.guideLegend">Legend: Foods and hazards shown lower-left</li>
+          <li data-i18n="ui.guideAI">AI: Press I to toggle, P to show/hide path</li>
+        </ul>
+
+        <p>
+          <span data-i18n="ui.aboutRepoLabel">Source:</span>
+          <a href="https://github.com/PeterDaveHello/bug-snake/" target="_blank" rel="noopener noreferrer"
+            data-i18n="ui.aboutRepoUrlPlaceholder"
+            >Open source repository</a
+          >
+        </p>
+      </section>
+    </div>
+
+    <div id="ui-layer">
+      <div id="loading-screen" class="screen active">
+        <h1 id="title-text" data-i18n="ui.title">SerpentOS: Bug Buster Snake</h1>
+        <p id="loading-text" data-i18n="ui.loading">Loading...</p>
+      </div>
+
+      <div id="title-screen" class="screen">
+        <h1 class="game-title" id="title-main-text" data-i18n="ui.title">
+          SerpentOS: Bug Buster Snake
+        </h1>
+        <button id="btn-start-game" type="button" data-i18n="ui.start">Start Game</button>
+        <button id="btn-about" type="button" data-i18n="ui.about">About</button>
+        <div class="title-guide">
+          <h2 class="guide-title" id="guide-title" data-i18n="ui.guideTitle">Quick Start</h2>
+          <ul class="guide-list">
+            <li id="guide-move">Move: Arrow Keys / WASD (Swipe on mobile)</li>
+            <li id="guide-settings">Settings: Use the panel (sections are collapsible)</li>
+            <li id="guide-pause">Pause: Press Esc or tap Pause</li>
+            <li id="guide-restart">Restart: R / Randomize: Shift+R</li>
+            <li id="guide-boost">Boost: Hold Space</li>
+            <li id="guide-legend">Legend: Foods and hazards shown lower-left</li>
+            <li id="guide-ai">AI: Press I to toggle, P to show/hide path</li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="level-clear-screen" class="screen">
+        <h2 id="level-clear-title" data-i18n="ui.levelCleared">Level Cleared!</h2>
+        <p id="level-clear-score">Score: 0</p>
+        <button id="btn-next-level" type="button" data-i18n="ui.nextLevel">Next Level</button>
+      </div>
+
+      <div id="game-over-screen" class="screen">
+        <h2 id="game-over-title" data-i18n="ui.gameOver">Game Over</h2>
+        <p id="game-over-score">Final Score: 0</p>
+        <p id="game-over-reason" class="game-over-reason">Reason: Unknown</p>
+        <p id="game-over-detail" class="game-over-detail">Tip:</p>
+        <p id="game-over-prompt" class="restart-prompt" data-i18n="ui.restartPrompt">Restart?</p>
+        <div class="screen-actions">
+          <button id="btn-restart-over" type="button">Restart Current Run (R)</button>
+          <button id="btn-restart-random-over" type="button">
+            Randomize &amp; Restart (Shift+R)
+          </button>
+          <button id="btn-close-over" type="button">Close (Esc)</button>
+        </div>
+      </div>
+
+      <div id="time-up-screen" class="screen">
+        <h2 id="time-up-title" data-i18n="ui.timeUp">TIME UP!</h2>
+        <p id="time-up-score">Final Score: 0</p>
+        <p id="time-up-prompt" class="restart-prompt" data-i18n="ui.restartPrompt">Restart?</p>
+        <div class="screen-actions">
+          <button id="btn-restart-time" type="button">Restart Current Run (R)</button>
+          <button id="btn-restart-random-time" type="button">
+            Randomize &amp; Restart (Shift+R)
+          </button>
+          <button id="btn-close-time" type="button">Close (Esc)</button>
+        </div>
+      </div>
+
+      <div id="pause-screen" class="screen">
+        <h2 id="pause-title" data-i18n="ui.pause">Pause</h2>
+        <button id="btn-resume" type="button" data-i18n="ui.resume">Resume</button>
+        <button id="btn-restart-pause" type="button" data-i18n="ui.restart">Restart</button>
+      </div>
+
+      <div id="about-screen" class="screen">
+        <h2 id="about-title" data-i18n="ui.aboutTitle">About</h2>
+        <div class="about-content">
+          <p id="about-description" data-i18n="ui.aboutDescription">
+            A modern Snake game built with Vanilla JS, Canvas 2D, and Web Audio.
+          </p>
+          <div class="about-row">
+            <span class="about-label" data-i18n="ui.aboutAuthorLabel">Author:</span>
+            <span id="about-author"></span>
+          </div>
+          <div class="about-row">
+            <span class="about-label" data-i18n="ui.aboutPlayUrlLabel">URL:</span>
+            <a
+              id="about-play-url"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-i18n="ui.aboutPlayUrlPlaceholder"
+              >Open current URL</a
+            >
+          </div>
+          <div class="about-row" id="about-repo-row">
+            <span class="about-label" data-i18n="ui.aboutRepoLabel">Source:</span>
+            <a
+              id="about-repo-url"
+              href="https://github.com/PeterDaveHello/bug-snake/"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-i18n="ui.aboutRepoUrlPlaceholder"
+              >Open source repository</a
+            >
+          </div>
+        </div>
+        <div class="screen-actions">
+          <button id="btn-close-about" type="button">Close (Esc)</button>
+        </div>
+      </div>
+      <div id="error-screen" class="screen">
+        <h1>⚠️</h1>
+        <p
+          class="error-message"
+          style="color: var(--color-primary); margin: 1rem; text-align: center; max-width: 400px"
+        ></p>
+        <button id="btn-error-retry" type="button" class="glow-btn" data-i18n="ui.retry">
+          Retry
+        </button>
+      </div>
+      <div id="status-toast" class="toast"></div>
+    </div>
+
+    <script type="module" src="scripts/main.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('./sw.js')
+            .then((reg) => console.log('SW registered'))
+            .catch((err) => console.log('SW registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
