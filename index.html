@@ -367,15 +367,6 @@
     </div>
 
     <script type="module" src="scripts/main.js"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker
-            .register('./sw.js')
-            .then((reg) => console.log('SW registered'))
-            .catch((err) => console.log('SW registration failed:', err));
-        });
-      }
-    </script>
+    <script type="module" src="scripts/sw-register.js"></script>
   </body>
 </html>
