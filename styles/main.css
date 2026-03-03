@@ -153,6 +153,23 @@ body {
   font-size: 0.8rem;
 }
 
+#seo-content kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15rem;
+  padding: 0.05rem 0.22rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font-size: 0.72rem;
+  line-height: 1;
+  text-transform: uppercase;
+  margin: 0 0.14rem;
+}
+
 #seo-content p + h3 {
   margin-top: 0.65rem;
 }

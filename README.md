@@ -45,7 +45,7 @@ accessibility, synthesized audio, and a proper game state machine.
 - PWA with service worker that pre-caches all core assets and locale files.
 - Accessible overlays: `inert` focus trap + auto-focus on modal open; `role="application"` on canvas with ARIA labels.
 - Init-failure screen with localized error message and retry button.
-- HUD buttons show inline `⌨ shortcut` hints (`Esc`, `R`, `L`, `Enter`, `A`).
+- HUD buttons show inline keyboard hints (`<kbd>Esc</kbd>`, `<kbd>R</kbd>`, `<kbd>L</kbd>`, `<kbd>Enter</kbd>`, `<kbd>A</kbd>`).
 - Mobile: on-screen D-pad with touch-hold auto-repeat; `touch-action` scoped to interactive zones.
 - Type-checked with JSDoc + `tsc`, with no TypeScript compilation step.
 - Built and iterated as an AI Vibe Coding demo using small diffs and review-driven refinement.
@@ -78,17 +78,17 @@ ES Modules require a server, so you can't just open `index.html` directly.
 
 ## 🕹️ Controls
 
-| Action                          | Keyboard                       | Mobile            |
-| :------------------------------ | :----------------------------- | :---------------- |
-| **Move**                        | Arrow Keys / WASD _(also Z+Q)_ | On-screen D-Pad   |
-| **Boost** (hold same direction) | Hold **Space**                 | Hold D-Pad button |
-| **Start (Title Screen)**        | Enter                          | Start Button      |
-| **About (Title/About Screen)**  | A                              | About Button      |
-| **Pause / Resume**              | Esc                            | Pause Button      |
-| **Restart**                     | R (`Shift+R` randomize)        | Restart Button    |
-| **Toggle Legend**               | L                              | Legend Button     |
-| **Toggle AI**                   | I                              | (Panel Setting)   |
-| **Toggle AI Path Display**      | P                              | (Panel Setting)   |
+| Action                          | Keyboard                                               | Mobile            |
+| :------------------------------ | :----------------------------------------------------- | :---------------- |
+| **Move**                        | <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd> / <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> _(also <kbd>Z</kbd>+<kbd>Q</kbd>)_ | On-screen D-Pad   |
+| **Boost** (hold same direction) | Hold <kbd>Space</kbd>                                 | Hold D-Pad button |
+| **Start (Title Screen)**        | <kbd>Enter</kbd>                                      | Start Button      |
+| **About (Title/About Screen)**  | <kbd>A</kbd>                                          | About Button      |
+| **Pause / Resume**              | <kbd>Esc</kbd>                                        | Pause Button      |
+| **Restart**                     | <kbd>R</kbd> (<kbd>Shift</kbd>+<kbd>R</kbd> randomize) | Restart Button    |
+| **Toggle Legend**               | <kbd>L</kbd>                                          | Legend Button     |
+| **Toggle AI**                   | <kbd>I</kbd>                                          | (Panel Setting)   |
+| **Toggle AI Path Display**      | <kbd>P</kbd>                                          | (Panel Setting)   |
 
 ## 🛠️ Development
 
@@ -113,6 +113,24 @@ ES Modules require a server, so you can't just open `index.html` directly.
 ├── i18n/               # Localization files (22 locales; see i18n/index.json)
 └── sw.js               # Service worker for offline caching
 ```
+
+### LOC Snapshot (cloc)
+
+`cloc --exclude-dir=node_modules,assets,.git,.github --timeout=1000 --by-file-by-lang .`
+
+- Scope: project source + docs only, excluding external/build folders
+- `60` files scanned
+- `18,869` total lines:
+  - `18,312` lines of code
+  - `1,414` blank lines
+  - `681` comment lines
+- Language distribution:
+  - JavaScript: `27` files / `7,312` code lines
+  - JSON: `26` files / `10,002` code lines
+  - CSS: `1` file / `892` code lines
+  - Markdown: `2` files / `242` code lines
+  - HTML: `1` file / `367` code lines
+  - TypeScript: `1` file / `42` code lines
 
 ### Checks
 
