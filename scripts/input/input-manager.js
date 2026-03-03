@@ -19,6 +19,9 @@ export class InputManager {
     this._lastDirectionInputAt = 0;
     /** @type {Map<'up' | 'down' | 'left' | 'right', number>} */
     this._heldDirectionSince = new Map();
+    this._allowDirectionRepeatAfterBlur = false;
+    this._windowBlurHandler = this._handleWindowBlur.bind(this);
+    this._windowFocusHandler = this._handleWindowFocus.bind(this);
 
     if (typeof window !== 'undefined' && typeof document !== 'undefined') {
       this._bindKeyboard();
@@ -278,7 +281,10 @@ export class InputManager {
       if (isDirectionKey) {
         e.preventDefault();
       }
-      if (e.repeat) return;
+      if (e.repeat && !this._allowDirectionRepeatAfterBlur) return;
+      if (e.repeat && this._allowDirectionRepeatAfterBlur) {
+        this._allowDirectionRepeatAfterBlur = false;
+      }
 
       void this._handleDirectionKeyDown(e.key);
     });
@@ -290,21 +296,31 @@ export class InputManager {
       void this._handleDirectionKeyUp(e.key);
     });
 
-    window.addEventListener('blur', () => {
-      this.boostActive = false;
-      this.heldDirection = null;
-      this._heldDirectionSince.clear();
-      this._activeCanvasTouchId = null;
-    });
+    window.addEventListener('blur', this._windowBlurHandler);
+
+    window.addEventListener('focus', this._windowFocusHandler);
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
-        this.boostActive = false;
-        this.heldDirection = null;
-        this._heldDirectionSince.clear();
-        this._activeCanvasTouchId = null;
+        this._clearInputState();
       }
     });
+  }
+
+  _handleWindowBlur() {
+    this._clearInputState();
+  }
+
+  _handleWindowFocus() {
+    this._clearInputState();
+  }
+
+  _clearInputState() {
+    this.boostActive = false;
+    this.heldDirection = null;
+    this._heldDirectionSince.clear();
+    this._activeCanvasTouchId = null;
+    this._allowDirectionRepeatAfterBlur = true;
   }
 
   _setHeldDirection(dir, since = Date.now()) {

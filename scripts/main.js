@@ -18,6 +18,9 @@ class GameApp {
     this._errorRetryBound = false;
     this._overlayKeyHandler = this._handleOverlayKeydown.bind(this);
     this._panelLoadErrorHandler = this._handlePanelLoadError.bind(this);
+    this._windowFocusHandler = this._handleWindowFocus.bind(this);
+    this._windowBlurHandler = this._handleWindowBlur.bind(this);
+    this._skipRepeatGuardForLetterShortcuts = false;
   }
 
   /**
@@ -76,6 +79,51 @@ class GameApp {
     }
   }
 
+  _handleWindowBlur() {
+    this._skipRepeatGuardForLetterShortcuts = true;
+  }
+
+  _handleWindowFocus() {
+    this._skipRepeatGuardForLetterShortcuts = true;
+    const gameCanvas = document.getElementById('game-canvas');
+    if (gameCanvas instanceof HTMLCanvasElement) {
+      try {
+        gameCanvas.focus({ preventScroll: true });
+      } catch {
+        gameCanvas.focus();
+      }
+    }
+  }
+
+  /**
+   * @param {string} letter
+   * @param {KeyboardEvent} event
+   * @returns {boolean}
+   */
+  _isPlainShortcut(letter, event) {
+    if (isPlainLetterShortcut(event, letter)) {
+      this._skipRepeatGuardForLetterShortcuts = false;
+      return true;
+    }
+    if (!this._skipRepeatGuardForLetterShortcuts) return false;
+    if (!event || typeof event.key !== 'string') return false;
+    if (Boolean(event.isComposing)) return false;
+    if (
+      Boolean(event.shiftKey) ||
+      Boolean(event.ctrlKey) ||
+      Boolean(event.metaKey) ||
+      Boolean(event.altKey)
+    )
+      return false;
+
+    const current = event.key.toLowerCase();
+    const target = letter.toLowerCase();
+    if (current !== target || current.length !== 1 || target.length !== 1) return false;
+
+    this._skipRepeatGuardForLetterShortcuts = false;
+    return true;
+  }
+
   /**
    * @param {string} id
    * @param {string} text
@@ -99,9 +147,18 @@ class GameApp {
     btn.textContent = '';
     btn.append(document.createTextNode(label), document.createTextNode(' '));
 
-    const kbd = document.createElement('kbd');
-    kbd.textContent = shortcut;
-    btn.append(kbd);
+    const keys = shortcut
+      .split('+')
+      .map((key) => key.trim())
+      .filter(Boolean);
+
+    keys.forEach((key, index) => {
+      if (index > 0) btn.append(document.createTextNode('+'));
+      const kbd = document.createElement('kbd');
+      kbd.textContent = key;
+      btn.append(kbd);
+    });
+
     btn.setAttribute('aria-label', label);
   }
 
@@ -378,6 +435,8 @@ class GameApp {
     this._bindButton('btn-close-about', () => this._closeAbout());
 
     window.addEventListener('keydown', this._overlayKeyHandler);
+    window.addEventListener('focus', this._windowFocusHandler);
+    window.addEventListener('blur', this._windowBlurHandler);
 
     import('./core/state-machine.js').then(({ gameState, GameState }) => {
       this._gameState = gameState;
@@ -460,6 +519,12 @@ class GameApp {
     this._setGuideText('guide-legend', i18n.t('ui.guideLegend'));
     this._setGuideText('guide-ai', i18n.t('ui.guideAI'));
 
+    this._setGuideText('seo-guide-move', i18n.t('ui.guideMove'));
+    this._setGuideText('seo-guide-pause', i18n.t('ui.guidePause'));
+    this._setGuideText('seo-guide-restart', i18n.t('ui.guideRestart'));
+    this._setGuideText('seo-guide-boost', i18n.t('ui.guideBoost'));
+    this._setGuideText('seo-guide-ai', i18n.t('ui.guideAI'));
+
     document.title = i18n.t('ui.title');
 
     // Update dynamic screens if active
@@ -484,14 +549,22 @@ class GameApp {
     }
 
     // Update overlay buttons
-    setElementText('btn-restart-over', `${i18n.t('ui.restartCurrent')} (R)`);
-    setElementText('btn-restart-random-over', `${i18n.t('ui.restartRandom')} (Shift+R)`);
-    setElementText('btn-close-over', `${i18n.t('ui.close')} (Esc)`);
+    this._setButtonTextWithShortcut('btn-restart-over', i18n.t('ui.restartCurrent'), 'R');
+    this._setButtonTextWithShortcut(
+      'btn-restart-random-over',
+      i18n.t('ui.restartRandom'),
+      'Shift+R'
+    );
+    this._setButtonTextWithShortcut('btn-close-over', i18n.t('ui.close'), 'Esc');
 
-    setElementText('btn-restart-time', `${i18n.t('ui.restartCurrent')} (R)`);
-    setElementText('btn-restart-random-time', `${i18n.t('ui.restartRandom')} (Shift+R)`);
-    setElementText('btn-close-time', `${i18n.t('ui.close')} (Esc)`);
-    setElementText('btn-close-about', `${i18n.t('ui.close')} (Esc)`);
+    this._setButtonTextWithShortcut('btn-restart-time', i18n.t('ui.restartCurrent'), 'R');
+    this._setButtonTextWithShortcut(
+      'btn-restart-random-time',
+      i18n.t('ui.restartRandom'),
+      'Shift+R'
+    );
+    this._setButtonTextWithShortcut('btn-close-time', i18n.t('ui.close'), 'Esc');
+    this._setButtonTextWithShortcut('btn-close-about', i18n.t('ui.close'), 'Esc');
 
     // Update Mobile/HUD buttons with aria-labels
     const updateAriaBtn = (id, key, pressed = null) => {
@@ -716,14 +789,13 @@ class GameApp {
       return;
     }
 
-    const isPlainA = isPlainLetterShortcut(event, 'a');
-    const isPlainL = isPlainLetterShortcut(event, 'l');
+    const isPlainA = this._isPlainShortcut('a', event);
+    const isPlainL = this._isPlainShortcut('l', event);
 
     const overActive = document.getElementById('game-over-screen')?.classList.contains('active');
     const timeActive = document.getElementById('time-up-screen')?.classList.contains('active');
     const titleActive = document.getElementById('title-screen')?.classList.contains('active');
     const aboutActive = document.getElementById('about-screen')?.classList.contains('active');
-
     if (titleActive && event.key === 'Enter') {
       if (event.repeat) {
         event.preventDefault();
