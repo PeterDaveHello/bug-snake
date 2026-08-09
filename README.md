@@ -114,6 +114,27 @@ ES Modules require a server, so you can't just open `index.html` directly.
 └── sw.js               # Service worker for offline caching
 ```
 
+### LOC Snapshot (cloc)
+
+`cloc --exclude-dir=node_modules,assets,.git,.github --not-match-f='package-lock\.json$' --timeout=1000 --by-file-by-lang .`
+
+- Scope: project source and docs, excluding `node_modules`, `package-lock.json`, `assets`, `.git`, and `.github`
+- Snapshot date: `2026-08-09`
+- `60` files scanned
+- `15,298` total lines:
+  - `13,200` lines of code
+  - `1,417` blank lines
+  - `681` comment lines
+- Language distribution:
+  - JavaScript: `27` files / `7,312` code lines
+  - JSON: `26` files / `4,315` code lines
+  - CSS: `1` file / `892` code lines
+  - Markdown: `2` files / `260` code lines
+  - HTML: `1` file / `367` code lines
+  - TypeScript: `1` file / `42` code lines
+  - XML: `1` file / `9` code lines
+  - Text: `1` file / `3` code lines
+
 ### Checks
 
 - **Node**: Requires Node.js v20+ for linting tools
