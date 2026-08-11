@@ -14,6 +14,11 @@ import { Snake } from '../core/snake.js';
 import { TimeManager } from '../core/time-manager.js';
 import { Direction, InputManager } from '../input/input-manager.js';
 import { MapGenerator, MapTemplate } from '../maps/map-generator.js';
+import {
+  KEYBOARD_HINT_TOKENS,
+  splitKeyboardShortcut,
+  tokenizeKeyboardHints
+} from '../utils/keyboard-hint.js';
 import { isPlainLetterShortcut } from '../utils/keyboard-shortcut.js';
 import { MinHeap } from '../utils/min-heap.js';
 
@@ -382,6 +387,56 @@ export function runCoreTests() {
   assert(
     isPlainLetterShortcut(shortcutEvent({ key: 'l' }), 'l'),
     'Shortcut utility supports legend key on locale-aware key input'
+  );
+
+  // 5.6 Keyboard Hint Tokenizer Tests
+  console.log('\n[Keyboard Hint Tokenizer]');
+  for (const token of KEYBOARD_HINT_TOKENS) {
+    const tokenParts = tokenizeKeyboardHints(`{${token}}`);
+    assert(
+      tokenParts.length === 1 && tokenParts[0]?.type === 'keys',
+      `Keyboard hint tokenizer recognizes {${token}}`
+    );
+  }
+  const arrowHintPart = tokenizeKeyboardHints('{arrowKeys}')[0];
+  assert(
+    arrowHintPart?.type === 'keys' && arrowHintPart.labelKey === 'ui.keyArrowKeys',
+    'Arrow-key hint exposes a localized accessible-name key'
+  );
+  const hintParts = tokenizeKeyboardHints('Move: {arrowKeys} / {wasd}; restart: {randomRestart}.');
+  assert(
+    hintParts.length === 7 &&
+      hintParts[0]?.type === 'text' &&
+      hintParts[0].value === 'Move: ' &&
+      hintParts[2]?.type === 'text' &&
+      hintParts[2].value === ' / ' &&
+      hintParts[4]?.type === 'text' &&
+      hintParts[4].value === '; restart: ' &&
+      hintParts[6]?.type === 'text' &&
+      hintParts[6].value === '.',
+    'Keyboard hint tokenizer preserves surrounding translated text'
+  );
+  const randomRestartPart = hintParts.find(
+    (part) => part.type === 'keys' && part.separator === '+'
+  );
+  assert(
+    randomRestartPart?.type === 'keys' && randomRestartPart.keys.join('+') === 'Shift+R',
+    'Keyboard hint tokenizer preserves combination-key structure'
+  );
+  assert(
+    randomRestartPart?.type === 'keys' && Object.isFrozen(randomRestartPart.keys),
+    'Keyboard hint tokenizer keeps shared key definitions immutable'
+  );
+  assert(
+    splitKeyboardShortcut('Shift+R').join('|') === 'Shift|R',
+    'Keyboard shortcut splitter preserves combination-key order'
+  );
+  const unknownHintParts = tokenizeKeyboardHints('Keep {unknown} and <b>text</b>');
+  assert(
+    unknownHintParts.length === 1 &&
+      unknownHintParts[0]?.type === 'text' &&
+      unknownHintParts[0].value === 'Keep {unknown} and <b>text</b>',
+    'Keyboard hint tokenizer preserves unknown placeholders and markup as text'
   );
 
   // 6. MapGenerator Tests
@@ -1068,6 +1123,10 @@ export function runCoreTests() {
     }
   }
   assert(localesCached, 'Caches every locale from i18n/index.json');
+  assert(
+    swContents.includes('./scripts/utils/keyboard-hint.js'),
+    'Caches keyboard hint utility module'
+  );
   assert(
     swContents.includes('./scripts/utils/keyboard-shortcut.js'),
     'Caches keyboard shortcut utility module'

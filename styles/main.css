@@ -153,6 +153,21 @@ body {
   font-size: 0.8rem;
 }
 
+#seo-content kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15rem;
+  padding: 0.05rem 0.22rem;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-bottom-width: 2px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
 #seo-content p + h3 {
   margin-top: 0.65rem;
 }
@@ -302,6 +317,11 @@ body {
   margin-top: 0.5rem;
 }
 
+.screen-actions button {
+  max-width: calc(100% - 1rem);
+  overflow-wrap: anywhere;
+}
+
 .about-content {
   max-width: 42rem;
   margin: 0 auto;
@@ -406,6 +426,12 @@ body {
   display: inline-flex;
   gap: 0.2rem;
   margin: 0 0.15rem;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.kbd-group-combo {
+  gap: 0;
 }
 
 .guide-list kbd {
@@ -421,7 +447,6 @@ body {
   color: var(--color-text);
   font-size: 0.8rem;
   line-height: 1;
-  text-transform: uppercase;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
 }
 
@@ -439,9 +464,18 @@ body {
   color: inherit;
   font-size: 0.7em;
   line-height: 1;
-  text-transform: uppercase;
+  text-transform: none;
   opacity: 0.8;
-  margin-left: 0.3rem;
+}
+
+.screen button .kbd-group,
+.hud-btn .kbd-group {
+  margin: 0 0 0 0.3rem;
+}
+
+html[dir='rtl'] .screen button .kbd-group,
+html[dir='rtl'] .hud-btn .kbd-group {
+  margin: 0 0.3rem 0 0;
 }
 
 .screen h2 {

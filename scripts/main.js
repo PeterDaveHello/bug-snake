@@ -3,6 +3,7 @@ import { audio } from './audio/audio-engine.js';
 import { game } from './core/game.js';
 import { i18n } from './i18n/i18n.js';
 import { isEditableElement, setElementText } from './utils/dom.js';
+import { splitKeyboardShortcut, tokenizeKeyboardHints } from './utils/keyboard-hint.js';
 import { isPlainLetterShortcut } from './utils/keyboard-shortcut.js';
 
 const ABOUT_REPO_URL = 'https://github.com/PeterDaveHello/bug-snake/';
@@ -82,8 +83,15 @@ class GameApp {
    */
   _setGuideText(id, text) {
     const el = document.getElementById(id);
-    if (el) {
-      el.innerHTML = this._formatGuideText(text);
+    if (!el) return;
+
+    el.textContent = '';
+    for (const part of tokenizeKeyboardHints(text)) {
+      if (part.type === 'text') {
+        el.append(document.createTextNode(part.value));
+      } else {
+        this._appendKeyboardKeys(el, part.keys, part.separator, part.labelKey);
+      }
     }
   }
 
@@ -96,82 +104,57 @@ class GameApp {
     const btn = document.getElementById(id);
     if (!(btn instanceof HTMLButtonElement)) return;
 
+    const keys = splitKeyboardShortcut(shortcut);
+    const localizedShortcut = keys.map((key) => this._getKeyboardKeyLabel(key)).join('+');
     btn.textContent = '';
     btn.append(document.createTextNode(label), document.createTextNode(' '));
-
-    const kbd = document.createElement('kbd');
-    kbd.textContent = shortcut;
-    btn.append(kbd);
-    btn.setAttribute('aria-label', label);
+    this._appendKeyboardKeys(btn, keys, '+');
+    btn.setAttribute('aria-label', `${label} (${localizedShortcut})`);
+    btn.setAttribute(
+      'aria-keyshortcuts',
+      keys.map((key) => (key === 'Esc' ? 'Escape' : key)).join('+')
+    );
   }
 
   /**
-   * @param {string} text
+   * @param {string} key
    * @returns {string}
    */
-  _escapeHtml(text) {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+  _getKeyboardKeyLabel(key) {
+    const translationKeys = {
+      Esc: 'ui.keyEscape',
+      Shift: 'ui.keyShift',
+      Space: 'ui.keySpace'
+    };
+    const translationKey = translationKeys[key];
+    return translationKey ? i18n.t(translationKey) : key;
   }
 
   /**
-   * @param {string} text
-   * @returns {string}
+   * @param {HTMLElement} parent
+   * @param {readonly string[]} keys
+   * @param {'' | '+'} separator
+   * @param {string} [labelKey]
    */
-  _formatGuideText(text) {
-    if (!text) return '';
-    const arrowGroup = this._renderKbdGroup(['↑', '↓', '←', '→']);
-    const wasdGroup = this._renderKbdGroup(['W', 'A', 'S', 'D']);
-
-    /** @type {Array<{ regex: RegExp, token: string, html: string }>} */
-    const replacements = [
-      { regex: /方向鍵/g, token: '__KBD_ARROWS__', html: arrowGroup },
-      { regex: /Arrow Keys/gi, token: '__KBD_ARROWS__', html: arrowGroup },
-      { regex: /\bWASD\b/g, token: '__KBD_WASD__', html: wasdGroup },
-      { regex: /\bW\/A\/S\/D\b/g, token: '__KBD_WASD__', html: wasdGroup },
-      { regex: /\bEsc\b/g, token: '__KBD_ESC__', html: '<kbd>Esc</kbd>' },
-      { regex: /\bShift\+R\b/g, token: '__KBD_SHIFT_R__', html: '<kbd>Shift</kbd>+<kbd>R</kbd>' },
-      { regex: /\bR\b/g, token: '__KBD_R__', html: '<kbd>R</kbd>' },
-      { regex: /\bSpace\b/g, token: '__KBD_SPACE__', html: '<kbd>Space</kbd>' },
-      { regex: /空白鍵/g, token: '__KBD_SPACE_ZH__', html: '<kbd>空白鍵</kbd>' },
-      { regex: /空格键/g, token: '__KBD_SPACE_CN__', html: '<kbd>空格键</kbd>' },
-      { regex: /按\s*I/g, token: '__KBD_I_ZH__', html: '按 <kbd>I</kbd>' },
-      { regex: /按\s*P/g, token: '__KBD_P_ZH__', html: '按 <kbd>P</kbd>' },
-      { regex: /\bPress\s+I\b/gi, token: '__KBD_I_EN__', html: 'Press <kbd>I</kbd>' },
-      { regex: /\bPress\s+P\b/gi, token: '__KBD_P_EN__', html: 'Press <kbd>P</kbd>' },
-      { regex: /\bP\b(?=\s+to\b)/g, token: '__KBD_P_TO__', html: '<kbd>P</kbd>' },
-      { regex: /\bI\b(?=\s+to\b)/g, token: '__KBD_I_TO__', html: '<kbd>I</kbd>' }
-    ];
-
-    let formatted = text;
-    for (const item of replacements) {
-      formatted = formatted.replace(item.regex, item.token);
+  _appendKeyboardKeys(parent, keys, separator, labelKey = undefined) {
+    const group = document.createElement('span');
+    group.className = 'kbd-group';
+    if (separator && keys.length > 1) group.classList.add('kbd-group-combo');
+    if (labelKey) {
+      group.setAttribute('role', 'img');
+      group.setAttribute('aria-label', i18n.t(labelKey));
     }
 
-    formatted = this._escapeHtml(formatted);
+    keys.forEach((key, index) => {
+      if (index > 0 && separator) {
+        group.append(document.createTextNode(separator));
+      }
+      const kbd = document.createElement('kbd');
+      kbd.textContent = this._getKeyboardKeyLabel(key.trim());
+      group.append(kbd);
+    });
 
-    for (const item of replacements) {
-      formatted = formatted.split(item.token).join(item.html);
-    }
-
-    return formatted;
-  }
-
-  /**
-   * @param {string[]} keys
-   * @returns {string}
-   */
-  _renderKbdGroup(keys) {
-    let markup = '<span class="kbd-group">';
-    for (const key of keys) {
-      markup += `<kbd>${key}</kbd>`;
-    }
-    markup += '</span>';
-    return markup;
+    parent.append(group);
   }
 
   _isMobileLayout() {
@@ -460,6 +443,12 @@ class GameApp {
     this._setGuideText('guide-legend', i18n.t('ui.guideLegend'));
     this._setGuideText('guide-ai', i18n.t('ui.guideAI'));
 
+    this._setGuideText('seo-guide-move', i18n.t('ui.guideMove'));
+    this._setGuideText('seo-guide-pause', i18n.t('ui.guidePause'));
+    this._setGuideText('seo-guide-restart', i18n.t('ui.guideRestart'));
+    this._setGuideText('seo-guide-boost', i18n.t('ui.guideBoost'));
+    this._setGuideText('seo-guide-ai', i18n.t('ui.guideAI'));
+
     document.title = i18n.t('ui.title');
 
     // Update dynamic screens if active
@@ -484,14 +473,22 @@ class GameApp {
     }
 
     // Update overlay buttons
-    setElementText('btn-restart-over', `${i18n.t('ui.restartCurrent')} (R)`);
-    setElementText('btn-restart-random-over', `${i18n.t('ui.restartRandom')} (Shift+R)`);
-    setElementText('btn-close-over', `${i18n.t('ui.close')} (Esc)`);
+    this._setButtonTextWithShortcut('btn-restart-over', i18n.t('ui.restartCurrent'), 'R');
+    this._setButtonTextWithShortcut(
+      'btn-restart-random-over',
+      i18n.t('ui.restartRandom'),
+      'Shift+R'
+    );
+    this._setButtonTextWithShortcut('btn-close-over', i18n.t('ui.close'), 'Esc');
 
-    setElementText('btn-restart-time', `${i18n.t('ui.restartCurrent')} (R)`);
-    setElementText('btn-restart-random-time', `${i18n.t('ui.restartRandom')} (Shift+R)`);
-    setElementText('btn-close-time', `${i18n.t('ui.close')} (Esc)`);
-    setElementText('btn-close-about', `${i18n.t('ui.close')} (Esc)`);
+    this._setButtonTextWithShortcut('btn-restart-time', i18n.t('ui.restartCurrent'), 'R');
+    this._setButtonTextWithShortcut(
+      'btn-restart-random-time',
+      i18n.t('ui.restartRandom'),
+      'Shift+R'
+    );
+    this._setButtonTextWithShortcut('btn-close-time', i18n.t('ui.close'), 'Esc');
+    this._setButtonTextWithShortcut('btn-close-about', i18n.t('ui.close'), 'Esc');
 
     // Update Mobile/HUD buttons with aria-labels
     const updateAriaBtn = (id, key, pressed = null) => {
