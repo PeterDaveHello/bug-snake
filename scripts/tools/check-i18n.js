@@ -3,6 +3,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { isKeyboardHintToken } from '../utils/keyboard-hint.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -27,6 +29,30 @@ function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
+/**
+ * @param {Record<string, unknown>} obj
+ * @param {string} key
+ * @returns {unknown}
+ */
+function getValue(obj, key) {
+  /** @type {unknown} */
+  let value = obj;
+  for (const part of key.split('.')) {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+    value = /** @type {Record<string, unknown>} */ (value)[part];
+  }
+  return value;
+}
+
+/**
+ * @param {unknown} value
+ * @returns {string[]}
+ */
+function getPlaceholders(value) {
+  if (typeof value !== 'string') return [];
+  return [...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
+}
+
 try {
   /** @type {string[]} */
   const locales = readJson(indexPath);
@@ -34,6 +60,15 @@ try {
   const baseKeys = new Set(flattenKeys(baseContent));
 
   let hasError = false;
+
+  for (const key of [...baseKeys].filter((candidate) => candidate.startsWith('ui.guide'))) {
+    for (const placeholder of getPlaceholders(getValue(baseContent, key))) {
+      if (!isKeyboardHintToken(placeholder)) {
+        console.error(`Error: Unknown keyboard hint placeholder {${placeholder}} in ${key}`);
+        hasError = true;
+      }
+    }
+  }
 
   for (const locale of locales) {
     const localePath = path.join(i18nDir, `${locale}.json`);
@@ -57,6 +92,19 @@ try {
     if (extraKeys.length > 0) {
       console.error(`Error: Extra keys in ${locale}.json:`, extraKeys);
       hasError = true;
+    }
+
+    for (const key of baseKeys) {
+      if (!localeKeys.has(key)) continue;
+      const expected = getPlaceholders(getValue(baseContent, key));
+      const actual = getPlaceholders(getValue(localeContent, key));
+      if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+        console.error(
+          `Error: Placeholder mismatch for ${key} in ${locale}.json:`,
+          `expected [${expected.join(', ')}], got [${actual.join(', ')}]`
+        );
+        hasError = true;
+      }
     }
   }
 

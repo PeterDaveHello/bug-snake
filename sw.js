@@ -24,6 +24,7 @@ const CORE_ASSETS = [
   './scripts/ai/ai-pilot.js',
   './scripts/ui/panel-manager.js',
   './scripts/utils/dom.js',
+  './scripts/utils/keyboard-hint.js',
   './scripts/utils/keyboard-shortcut.js',
   './scripts/utils/min-heap.js',
   './i18n/index.json',

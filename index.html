@@ -232,12 +232,27 @@
 
         <h3 data-i18n="ui.guideTitle">Quick Start</h3>
         <ul>
-          <li data-i18n="ui.guideMove">Move: Arrow Keys / WASD (Swipe on mobile)</li>
-          <li data-i18n="ui.guidePause">Pause: Press Esc or tap Pause</li>
-          <li data-i18n="ui.guideRestart">Restart: R / Randomize: Shift+R</li>
-          <li data-i18n="ui.guideBoost">Boost: Hold Space</li>
+          <li id="seo-guide-move">
+            Move:
+            <span class="kbd-group" role="img" aria-label="Arrow Keys"
+              ><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></span
+            >
+            / <span class="kbd-group"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
+            (Swipe on mobile)
+          </li>
+          <li id="seo-guide-pause">
+            Pause: Press <kbd>Esc</kbd> or tap Pause
+          </li>
+          <li id="seo-guide-restart">
+            Restart: <kbd>R</kbd> / Randomize: <kbd>Shift</kbd>+<kbd>R</kbd>
+          </li>
+          <li id="seo-guide-boost">
+            Boost: Hold <kbd>Space</kbd>
+          </li>
           <li data-i18n="ui.guideLegend">Legend: Foods and hazards shown lower-left</li>
-          <li data-i18n="ui.guideAI">AI: Press I to toggle, P to show/hide path</li>
+          <li id="seo-guide-ai">
+            AI: Press <kbd>I</kbd> to toggle, <kbd>P</kbd> to show/hide path
+          </li>
         </ul>
 
         <p>
@@ -265,13 +280,24 @@
         <div class="title-guide">
           <h2 class="guide-title" id="guide-title" data-i18n="ui.guideTitle">Quick Start</h2>
           <ul class="guide-list">
-            <li id="guide-move">Move: Arrow Keys / WASD (Swipe on mobile)</li>
+            <li id="guide-move">
+              Move:
+              <span class="kbd-group" role="img" aria-label="Arrow Keys"
+                ><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></span
+              >
+              / <span class="kbd-group"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></span>
+              (Swipe on mobile)
+            </li>
             <li id="guide-settings">Settings: Use the panel (sections are collapsible)</li>
-            <li id="guide-pause">Pause: Press Esc or tap Pause</li>
-            <li id="guide-restart">Restart: R / Randomize: Shift+R</li>
-            <li id="guide-boost">Boost: Hold Space</li>
+            <li id="guide-pause">Pause: Press <kbd>Esc</kbd> or tap Pause</li>
+            <li id="guide-restart">
+              Restart: <kbd>R</kbd> / Randomize: <kbd>Shift</kbd>+<kbd>R</kbd>
+            </li>
+            <li id="guide-boost">Boost: Hold <kbd>Space</kbd></li>
             <li id="guide-legend">Legend: Foods and hazards shown lower-left</li>
-            <li id="guide-ai">AI: Press I to toggle, P to show/hide path</li>
+            <li id="guide-ai">
+              AI: Press <kbd>I</kbd> to toggle, <kbd>P</kbd> to show/hide path
+            </li>
           </ul>
         </div>
       </div>
@@ -289,11 +315,11 @@
         <p id="game-over-detail" class="game-over-detail">Tip:</p>
         <p id="game-over-prompt" class="restart-prompt" data-i18n="ui.restartPrompt">Restart?</p>
         <div class="screen-actions">
-          <button id="btn-restart-over" type="button">Restart Current Run (R)</button>
+          <button id="btn-restart-over" type="button">Restart Current Run <kbd>R</kbd></button>
           <button id="btn-restart-random-over" type="button">
-            Randomize &amp; Restart (Shift+R)
+            Randomize &amp; Restart <kbd>Shift</kbd>+<kbd>R</kbd>
           </button>
-          <button id="btn-close-over" type="button">Close (Esc)</button>
+          <button id="btn-close-over" type="button">Close <kbd>Esc</kbd></button>
         </div>
       </div>
 
@@ -302,11 +328,11 @@
         <p id="time-up-score">Final Score: 0</p>
         <p id="time-up-prompt" class="restart-prompt" data-i18n="ui.restartPrompt">Restart?</p>
         <div class="screen-actions">
-          <button id="btn-restart-time" type="button">Restart Current Run (R)</button>
+          <button id="btn-restart-time" type="button">Restart Current Run <kbd>R</kbd></button>
           <button id="btn-restart-random-time" type="button">
-            Randomize &amp; Restart (Shift+R)
+            Randomize &amp; Restart <kbd>Shift</kbd>+<kbd>R</kbd>
           </button>
-          <button id="btn-close-time" type="button">Close (Esc)</button>
+          <button id="btn-close-time" type="button">Close <kbd>Esc</kbd></button>
         </div>
       </div>
 
@@ -350,7 +376,7 @@
           </div>
         </div>
         <div class="screen-actions">
-          <button id="btn-close-about" type="button">Close (Esc)</button>
+          <button id="btn-close-about" type="button">Close <kbd>Esc</kbd></button>
         </div>
       </div>
       <div id="error-screen" class="screen">
