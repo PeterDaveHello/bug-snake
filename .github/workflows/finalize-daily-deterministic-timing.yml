@@ -54,14 +54,22 @@ jobs:
           import json
           from pathlib import Path
 
+          def replace_once(source, old, new, label):
+              count = source.count(old)
+              if count != 1:
+                  raise SystemExit(f'Unexpected source shape for {label}: {count} matches')
+              return source.replace(old, new)
+
           daily_path = Path('scripts/core/daily-challenge.js')
           daily = daily_path.read_text()
-          old = """function ensureWebCrypto() {
+          daily = replace_once(
+              daily,
+              """function ensureWebCrypto() {
             if (!globalThis.crypto?.subtle || !globalThis.crypto.getRandomValues) {
               throw new Error('Web Crypto API is unavailable');
             }
-          }"""
-          new = """/**
+          }""",
+              """/**
            * @param {Crypto | undefined} [cryptoApi]
            * @returns {boolean}
            */
@@ -73,15 +81,15 @@ jobs:
             if (!isDailyShareSupported()) {
               throw new Error('Web Crypto API is unavailable');
             }
-          }"""
-          if daily.count(old) != 1:
-            raise SystemExit('Unexpected Web Crypto guard shape')
-          daily_path.write_text(daily.replace(old, new))
+          }""",
+              'Web Crypto guard',
+          )
+          daily_path.write_text(daily)
 
           controller_path = Path('scripts/ui/daily-challenge-controller.js')
           controller = controller_path.read_text()
-          replacements = [
-            (
+          controller = replace_once(
+              controller,
               """  decodeDailyShare,
             encodeDailyShare,
             getLocalDateKey""",
@@ -90,16 +98,24 @@ jobs:
             getLocalDateKey,
             isDailyShareSupported""",
               'daily share import',
-            ),
-            (
-              """    this.invalidShare = false;
+          )
+          controller = replace_once(
+              controller,
+              """    this.challenge = createDailyChallenge(getLocalDateKey());
+            /** @type {number | null} */
+            this.sharedScore = null;
+            this.invalidShare = false;
             this.sharedChallenge = false;""",
-              """    this.invalidShare = false;
+              """    this.challenge = createDailyChallenge(getLocalDateKey());
+            /** @type {number | null} */
+            this.sharedScore = null;
+            this.invalidShare = false;
             this.shareUnavailable = false;
             this.sharedChallenge = false;""",
               'constructor share state',
-            ),
-            (
+          )
+          controller = replace_once(
+              controller,
               """    const token = new URL(window.location.href).searchParams.get(SHARE_PARAM);
             if (!token) return;
 
@@ -113,8 +129,9 @@ jobs:
 
             try {""",
               'shared-link capability check',
-            ),
-            (
+          )
+          controller = replace_once(
+              controller,
               """  async _shareResult() {
             if (!this.active || !this.completed) return;
             const score = game.scoreManager.score;""",
@@ -126,18 +143,22 @@ jobs:
             }
             const score = game.scoreManager.score;""",
               'share action capability check',
-            ),
-            (
-              """    this.sharedScore = null;
+          )
+          controller = replace_once(
+              controller,
+              """    this.challenge = createDailyChallenge(getLocalDateKey());
+            this.sharedScore = null;
             this.invalidShare = false;
             this.sharedChallenge = false;""",
-              """    this.sharedScore = null;
+              """    this.challenge = createDailyChallenge(getLocalDateKey());
+            this.sharedScore = null;
             this.invalidShare = false;
             this.shareUnavailable = false;
             this.sharedChallenge = false;""",
               'exit share state reset',
-            ),
-            (
+          )
+          controller = replace_once(
+              controller,
               """    if (this.elements.warning instanceof HTMLElement) {
               this.elements.warning.hidden = !this.invalidShare;
               this.elements.warning.textContent = this.invalidShare ? i18n.t('daily.invalidShare') : '';
@@ -152,30 +173,28 @@ jobs:
               this.elements.warning.textContent = warningText;
             }""",
               'share warning rendering',
-            ),
-          ]
-          for old_text, new_text, label in replacements:
-            if controller.count(old_text) != 1:
-              raise SystemExit(f'Unexpected controller shape for {label}')
-            controller = controller.replace(old_text, new_text)
+          )
           controller_path.write_text(controller)
 
           test_path = Path('scripts/tests/daily-challenge-test.js')
           test = test_path.read_text()
-          old_import = """  createDailyChallenge,
+          test = replace_once(
+              test,
+              """  createDailyChallenge,
             decodeDailyShare,
             encodeDailyShare
-          } from '../core/daily-challenge.js';"""
-          new_import = """  createDailyChallenge,
+          } from '../core/daily-challenge.js';""",
+              """  createDailyChallenge,
             decodeDailyShare,
             encodeDailyShare,
             isDailyShareSupported
-          } from '../core/daily-challenge.js';"""
-          if test.count(old_import) != 1:
-            raise SystemExit('Unexpected daily challenge test import block')
-          test = test.replace(old_import, new_import)
-          anchor = """  const first = createDailyChallenge('2026-08-10');"""
-          addition = """  assert(
+          } from '../core/daily-challenge.js';""",
+              'daily challenge test import',
+          )
+          test = replace_once(
+              test,
+              """  const first = createDailyChallenge('2026-08-10');""",
+              """  assert(
             isDailyShareSupported(globalThis.crypto),
             'Daily sharing detects Web Crypto in the normal test environment'
           );
@@ -184,10 +203,10 @@ jobs:
             'Daily sharing reports unsupported environments before encoding or decoding links'
           );
 
-          const first = createDailyChallenge('2026-08-10');"""
-          if test.count(anchor) != 1:
-            raise SystemExit('Unexpected daily challenge test insertion point')
-          test_path.write_text(test.replace(anchor, addition))
+          const first = createDailyChallenge('2026-08-10');""",
+              'daily share capability tests',
+          )
+          test_path.write_text(test)
 
           translations = {
             'ar-SA': 'لا يمكن لهذه البيئة إنشاء روابط المشاركة أو التحقق منها. افتح اللعبة عبر HTTPS أو localhost.',
@@ -215,28 +234,25 @@ jobs:
           }
           locales = json.loads(Path('i18n/index.json').read_text())
           if set(locales) != set(translations):
-            raise SystemExit('Translation map does not match locale index')
+              raise SystemExit('Translation map does not match locale index')
           for locale in locales:
-            path = Path('i18n') / f'{locale}.json'
-            data = json.loads(path.read_text())
-            daily = data.get('daily')
-            if not isinstance(daily, dict) or 'invalidShare' not in daily:
-              raise SystemExit(f'Unexpected daily locale shape: {locale}')
-            daily['shareUnavailable'] = translations[locale]
-            path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
+              path = Path('i18n') / f'{locale}.json'
+              data = json.loads(path.read_text())
+              daily_section = data.get('daily')
+              if not isinstance(daily_section, dict) or 'invalidShare' not in daily_section:
+                  raise SystemExit(f'Unexpected daily locale shape: {locale}')
+              daily_section['shareUnavailable'] = translations[locale]
+              path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
           PY
 
           npm ci
           npx prettier --write scripts/core/daily-challenge.js scripts/ui/daily-challenge-controller.js scripts/tests/daily-challenge-test.js i18n/*.json
           npm run check
           npm run check:quality
-
           git diff --check
+
           test "$(git diff --name-only "$EXPECTED_HEAD" | wc -l)" -eq 25
           test "$(git diff --name-only "$EXPECTED_HEAD" | grep -c '^i18n/.*\.json$')" -eq 22
-          test "$(git diff --name-only "$EXPECTED_HEAD" | grep -c '^scripts/core/daily-challenge.js$')" -eq 1
-          test "$(git diff --name-only "$EXPECTED_HEAD" | grep -c '^scripts/ui/daily-challenge-controller.js$')" -eq 1
-          test "$(git diff --name-only "$EXPECTED_HEAD" | grep -c '^scripts/tests/daily-challenge-test.js$')" -eq 1
 
           git config user.name 'Peter Dave Hello'
           git config user.email '3691490+PeterDaveHello@users.noreply.github.com'
