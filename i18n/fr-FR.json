@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "Tutoriel",
     "rules": "Résumé des règles"
+  },
+  "daily": {
+    "title": "Chasse aux bugs quotidienne",
+    "start": "Démarrer le défi quotidien",
+    "best": "Meilleur du jour : {score}",
+    "attempts": "Tentatives : {count}",
+    "friendScore": "Score de l’ami : {score}",
+    "invalidShare": "Le lien du défi partagé est invalide ou a été modifié.",
+    "resultTitle": "Défi quotidien terminé",
+    "newBest": "Nouveau meilleur score quotidien !",
+    "disclaimer": "Les scores partagés ne sont pas vérifiés par le serveur.",
+    "share": "Partager le résultat",
+    "exit": "Retour au titre",
+    "shareCopied": "Lien du défi copié.",
+    "shareFallback": "Copiez ce lien de défi :",
+    "rulesLocked": "Les règles du défi quotidien sont verrouillées.",
+    "rules": "{map} · {speed} · Poison : {poison}"
   }
 }

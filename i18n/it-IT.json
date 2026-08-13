@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "Tutorial",
     "rules": "Riepilogo regole"
+  },
+  "daily": {
+    "title": "Caccia agli insetti giornaliera",
+    "start": "Avvia sfida giornaliera",
+    "best": "Migliore di oggi: {score}",
+    "attempts": "Tentativi: {count}",
+    "friendScore": "Punteggio amico: {score}",
+    "invalidShare": "Il link della sfida condivisa non è valido o è stato modificato.",
+    "resultTitle": "Sfida giornaliera completata",
+    "newBest": "Nuovo record giornaliero!",
+    "disclaimer": "I punteggi condivisi non sono verificati dal server.",
+    "share": "Condividi risultato",
+    "exit": "Torna al titolo",
+    "shareCopied": "Link della sfida copiato.",
+    "shareFallback": "Copia questo link della sfida:",
+    "rulesLocked": "Le regole della sfida giornaliera sono bloccate.",
+    "rules": "{map} · {speed} · Veleno: {poison}"
   }
 }

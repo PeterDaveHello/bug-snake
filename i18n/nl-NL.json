@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "Tutorial",
     "rules": "Regeloverzicht"
+  },
+  "daily": {
+    "title": "Dagelijkse insectenjacht",
+    "start": "Dagelijkse uitdaging starten",
+    "best": "Beste van vandaag: {score}",
+    "attempts": "Pogingen: {count}",
+    "friendScore": "Score van vriend: {score}",
+    "invalidShare": "De gedeelde uitdagingslink is ongeldig of gewijzigd.",
+    "resultTitle": "Dagelijkse uitdaging voltooid",
+    "newBest": "Nieuw dagrecord!",
+    "disclaimer": "Gedeelde scores worden niet door de server geverifieerd.",
+    "share": "Resultaat delen",
+    "exit": "Terug naar titel",
+    "shareCopied": "Uitdagingslink gekopieerd.",
+    "shareFallback": "Kopieer deze uitdagingslink:",
+    "rulesLocked": "De regels van de dagelijkse uitdaging zijn vergrendeld.",
+    "rules": "{map} · {speed} · Gif: {poison}"
   }
 }

@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "Samouczek",
     "rules": "Podsumowanie zasad"
+  },
+  "daily": {
+    "title": "Codzienne polowanie na robaki",
+    "start": "Rozpocznij codzienne wyzwanie",
+    "best": "Najlepszy dziś: {score}",
+    "attempts": "Próby: {count}",
+    "friendScore": "Wynik znajomego: {score}",
+    "invalidShare": "Udostępniony link wyzwania jest nieprawidłowy lub został zmieniony.",
+    "resultTitle": "Codzienne wyzwanie ukończone",
+    "newBest": "Nowy dzienny rekord!",
+    "disclaimer": "Udostępnione wyniki nie są weryfikowane przez serwer.",
+    "share": "Udostępnij wynik",
+    "exit": "Wróć do tytułu",
+    "shareCopied": "Skopiowano link wyzwania.",
+    "shareFallback": "Skopiuj ten link wyzwania:",
+    "rulesLocked": "Zasady codziennego wyzwania są zablokowane.",
+    "rules": "{map} · {speed} · Trucizna: {poison}"
   }
 }

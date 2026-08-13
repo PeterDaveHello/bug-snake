@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "Hướng dẫn",
     "rules": "Tóm tắt luật"
+  },
+  "daily": {
+    "title": "Săn côn trùng hằng ngày",
+    "start": "Bắt đầu thử thách hằng ngày",
+    "best": "Tốt nhất hôm nay: {score}",
+    "attempts": "Số lần thử: {count}",
+    "friendScore": "Điểm của bạn bè: {score}",
+    "invalidShare": "Liên kết thử thách được chia sẻ không hợp lệ hoặc đã bị thay đổi.",
+    "resultTitle": "Hoàn thành thử thách hằng ngày",
+    "newBest": "Kỷ lục hằng ngày mới!",
+    "disclaimer": "Điểm được chia sẻ không được máy chủ xác minh.",
+    "share": "Chia sẻ kết quả",
+    "exit": "Quay lại tiêu đề",
+    "shareCopied": "Đã sao chép liên kết thử thách.",
+    "shareFallback": "Sao chép liên kết thử thách này:",
+    "rulesLocked": "Luật thử thách hằng ngày đã được khóa.",
+    "rules": "{map} · {speed} · Độc: {poison}"
   }
 }

@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "튜토리얼",
     "rules": "규칙 요약"
+  },
+  "daily": {
+    "title": "일일 버그 사냥",
+    "start": "일일 도전 시작",
+    "best": "오늘 최고 기록: {score}",
+    "attempts": "도전 횟수: {count}",
+    "friendScore": "친구 점수: {score}",
+    "invalidShare": "공유된 도전 링크가 올바르지 않거나 변경되었습니다.",
+    "resultTitle": "일일 도전 완료",
+    "newBest": "새로운 오늘 최고 기록!",
+    "disclaimer": "공유 점수는 서버에서 검증되지 않습니다.",
+    "share": "결과 공유",
+    "exit": "타이틀로 돌아가기",
+    "shareCopied": "도전 링크를 복사했습니다.",
+    "shareFallback": "이 도전 링크를 복사하세요:",
+    "rulesLocked": "일일 도전 규칙은 잠겨 있습니다.",
+    "rules": "{map} · {speed} · 독: {poison}"
   }
 }

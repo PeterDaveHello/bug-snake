@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "Eğitim",
     "rules": "Kurallar özeti"
+  },
+  "daily": {
+    "title": "Günlük Böcek Avı",
+    "start": "Günlük mücadeleyi başlat",
+    "best": "Bugünün en iyisi: {score}",
+    "attempts": "Denemeler: {count}",
+    "friendScore": "Arkadaş skoru: {score}",
+    "invalidShare": "Paylaşılan mücadele bağlantısı geçersiz veya değiştirilmiş.",
+    "resultTitle": "Günlük mücadele tamamlandı",
+    "newBest": "Yeni günlük rekor!",
+    "disclaimer": "Paylaşılan skorlar sunucu tarafından doğrulanmaz.",
+    "share": "Sonucu paylaş",
+    "exit": "Başlığa dön",
+    "shareCopied": "Mücadele bağlantısı kopyalandı.",
+    "shareFallback": "Bu mücadele bağlantısını kopyalayın:",
+    "rulesLocked": "Günlük mücadele kuralları kilitli.",
+    "rules": "{map} · {speed} · Zehir: {poison}"
   }
 }

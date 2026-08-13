@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "教程",
     "rules": "规则摘要"
+  },
+  "daily": {
+    "title": "每日除虫挑战",
+    "start": "开始每日挑战",
+    "best": "今日最佳：{score}",
+    "attempts": "挑战次数：{count}",
+    "friendScore": "好友分数：{score}",
+    "invalidShare": "分享的挑战网址无效或已被修改。",
+    "resultTitle": "每日挑战完成",
+    "newBest": "刷新今日最佳！",
+    "disclaimer": "分享分数未经服务器验证。",
+    "share": "分享结果",
+    "exit": "返回标题画面",
+    "shareCopied": "挑战网址已复制。",
+    "shareFallback": "请复制这个挑战网址：",
+    "rulesLocked": "每日挑战规则已锁定。",
+    "rules": "{map} · {speed} · 毒药：{poison}"
   }
 }

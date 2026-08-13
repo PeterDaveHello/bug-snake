@@ -1,5 +1,5 @@
 // @ts-check
-import { rng } from '../core/random.js';
+import { visualRng } from '../core/random.js';
 
 export class ParticleSystem {
   constructor(renderer, maxParticles = 60) {
@@ -26,8 +26,8 @@ export class ParticleSystem {
     const py = this.renderer.offsetY + y * this.renderer.cellSize + this.renderer.cellSize / 2;
 
     for (let i = 0; i < count; i++) {
-      const angle = rng.nextFloat() * Math.PI * 2;
-      const speed = rng.nextFloat() * 2 + 1;
+      const angle = visualRng.nextFloat() * Math.PI * 2;
+      const speed = visualRng.nextFloat() * 2 + 1;
 
       if (this._count >= this.maxParticles) {
         // Evict oldest particle by shifting left; no allocation needed
@@ -46,9 +46,9 @@ export class ParticleSystem {
       p.vx = Math.cos(angle) * speed;
       p.vy = Math.sin(angle) * speed;
       p.life = 1.0;
-      p.decay = rng.nextFloat() * 0.03 + 0.02;
+      p.decay = visualRng.nextFloat() * 0.03 + 0.02;
       p.color = color;
-      p.size = rng.nextFloat() * 3 + 2;
+      p.size = visualRng.nextFloat() * 3 + 2;
     }
   }
 

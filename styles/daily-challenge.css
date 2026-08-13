@@ -1,0 +1,150 @@
+.daily-challenge-card {
+  width: min(34rem, calc(100vw - 3rem));
+  margin: 0 0 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(76, 201, 240, 0.45);
+  border-radius: 8px;
+  background: rgba(5, 5, 16, 0.72);
+  box-shadow: 0 0 14px rgba(76, 201, 240, 0.14);
+}
+
+.daily-challenge-card h2 {
+  margin: 0 0 0.3rem;
+  color: var(--color-primary);
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.daily-challenge-date,
+.daily-challenge-rules,
+.daily-challenge-friend-score,
+.daily-challenge-warning {
+  margin: 0.25rem 0;
+  line-height: 1.35;
+}
+
+.daily-challenge-date {
+  color: var(--color-text);
+  font-weight: bold;
+}
+
+.daily-challenge-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 1rem;
+  margin: 0.4rem 0;
+  color: var(--color-primary);
+}
+
+.daily-challenge-rules {
+  color: rgba(224, 224, 224, 0.85);
+  font-size: 0.85rem;
+}
+
+.daily-challenge-friend-score {
+  color: var(--color-accent);
+  font-weight: bold;
+}
+
+.daily-challenge-warning {
+  color: #ffcc00;
+  font-size: 0.8rem;
+}
+
+.daily-result-panel {
+  width: min(32rem, calc(100vw - 3rem));
+  margin-top: 0.6rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(76, 201, 240, 0.35);
+  border-radius: 8px;
+  background: rgba(5, 5, 16, 0.65);
+}
+
+.daily-result-panel h3 {
+  margin-bottom: 0.45rem;
+  color: var(--color-primary);
+  font-size: 1.1rem;
+}
+
+.daily-result-panel p {
+  margin: 0.2rem 0;
+}
+
+.daily-result-new-best {
+  color: var(--color-accent);
+  font-weight: bold;
+}
+
+.daily-result-disclaimer {
+  color: rgba(224, 224, 224, 0.72);
+  font-size: 0.75rem;
+}
+
+.daily-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.daily-result-actions button {
+  margin: 0.35rem 0;
+}
+
+.hud-daily-challenge {
+  color: var(--color-accent);
+  text-shadow: 0 0 10px var(--color-accent);
+}
+
+body.daily-challenge-active #controls-panel {
+  opacity: 0.55;
+}
+
+body.daily-challenge-active #btn-hud-settings,
+body.daily-challenge-active #btn-restart-random-over,
+body.daily-challenge-active #btn-close-over {
+  display: none !important;
+}
+
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  .daily-challenge-card {
+    width: min(30rem, calc(100vw - 2rem));
+    max-height: 48vh;
+    overflow-y: auto;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .daily-challenge-card h2 {
+    font-size: 0.95rem;
+  }
+
+  .daily-challenge-rules,
+  .daily-challenge-warning {
+    font-size: 0.75rem;
+  }
+
+  .daily-result-panel {
+    width: min(30rem, calc(100vw - 2rem));
+    max-height: 48vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-height: 700px) {
+  #title-screen.active,
+  #game-over-screen.active {
+    justify-content: flex-start;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: 1rem;
+    scrollbar-gutter: stable;
+  }
+
+  .daily-challenge-card,
+  .daily-result-panel {
+    flex: 0 0 auto;
+  }
+}

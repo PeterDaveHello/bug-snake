@@ -192,5 +192,22 @@
   "tutorial": {
     "title": "Tutorial",
     "rules": "Rules Summary"
+  },
+  "daily": {
+    "title": "Daily Bug Hunt",
+    "start": "Start Daily Challenge",
+    "best": "Daily Best: {score}",
+    "attempts": "Attempts: {count}",
+    "friendScore": "Friend Score: {score}",
+    "invalidShare": "Shared challenge link is invalid or was modified.",
+    "resultTitle": "Daily Challenge Complete",
+    "newBest": "New daily best!",
+    "disclaimer": "Shared scores are not server-verified.",
+    "share": "Share Result",
+    "exit": "Back to Title",
+    "shareCopied": "Challenge link copied.",
+    "shareFallback": "Copy this challenge URL:",
+    "rulesLocked": "Daily challenge rules are locked.",
+    "rules": "{map} · {speed} · Poison: {poison}"
   }
 }
