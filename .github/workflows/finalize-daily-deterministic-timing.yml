@@ -140,18 +140,40 @@ jobs:
           if test_source.count(anchor) != 1:
               raise SystemExit('Expected one daily review test insertion point')
           test_path.write_text(test_source.replace(anchor, replacement))
+
+          vector_path = Path('scripts/tests/daily-challenge-vector-test.js')
+          vector_source = vector_path.read_text()
+          old_imports = """import { GameConfig, ItemType } from '../core/config.js';
+          import { createDailyV1ItemAlgorithm } from '../core/daily-v1-algorithm.js';
+          import { Grid } from '../core/grid.js';
+          import { createDailyChallenge } from '../core/daily-challenge.js';"""
+          new_imports = """import { GameConfig, ItemType } from '../core/config.js';
+          import { createDailyChallenge } from '../core/daily-challenge.js';
+          import { createDailyV1ItemAlgorithm } from '../core/daily-v1-algorithm.js';
+          import { Grid } from '../core/grid.js';"""
+          if vector_source.count(old_imports) != 1:
+              raise SystemExit('Expected one daily vector import block')
+          vector_path.write_text(vector_source.replace(old_imports, new_imports))
           PY
 
           npm ci
-          npx prettier --write scripts/core/game.js scripts/tests/daily-review-contract-test.js
+          npx prettier --write \
+            renovate.json \
+            scripts/core/game.js \
+            scripts/tests/daily-challenge-store-regression-test.js \
+            scripts/tests/daily-challenge-vector-test.js \
+            scripts/tests/daily-review-contract-test.js
           npm run check
           npm run check:quality
 
           mapfile -t changed < <(git diff --name-only "$EXPECTED_HEAD")
           printf 'Changed files:\n%s\n' "${changed[@]}"
-          test "${#changed[@]}" -eq 2
-          test "${changed[0]}" = 'scripts/core/game.js'
-          test "${changed[1]}" = 'scripts/tests/daily-review-contract-test.js'
+          test "${#changed[@]}" -eq 5
+          test "${changed[0]}" = 'renovate.json'
+          test "${changed[1]}" = 'scripts/core/game.js'
+          test "${changed[2]}" = 'scripts/tests/daily-challenge-store-regression-test.js'
+          test "${changed[3]}" = 'scripts/tests/daily-challenge-vector-test.js'
+          test "${changed[4]}" = 'scripts/tests/daily-review-contract-test.js'
 
           git config user.name 'Peter Dave Hello'
           git config user.email '3691490+PeterDaveHello@users.noreply.github.com'
@@ -161,11 +183,14 @@ jobs:
           GIT_AUTHOR_DATE="$now" GIT_COMMITTER_DATE="$now" \
             git commit \
               -m 'Add daily bug hunt challenges' \
-              -m 'Add deterministic daily challenges with versioned gameplay, resilient local records, offline share links, and simulation-time speed smoothing for reproducible rule timing.'
+              -m 'Add deterministic daily challenges with versioned gameplay, resilient local records, offline share links, simulation-time speed smoothing, and fully clean quality checks.'
 
           test "$(git rev-list --count origin/master..HEAD)" -eq 1
           test "$(git rev-parse HEAD^)" = "$EXPECTED_BASE"
-          test -z "$(git diff --name-only HEAD -- .github/workflows/finalize-daily-deterministic-timing.yml)"
+          if git cat-file -e 'HEAD:.github/workflows/finalize-daily-deterministic-timing.yml' 2>/dev/null; then
+            echo 'Temporary finalizer unexpectedly entered the PR tree' >&2
+            exit 1
+          fi
           new_sha="$(git rev-parse HEAD)"
           echo "new_sha=$new_sha" >> "$GITHUB_OUTPUT"
 
