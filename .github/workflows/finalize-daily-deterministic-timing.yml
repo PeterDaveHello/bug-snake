@@ -99,21 +99,19 @@ jobs:
             isDailyShareSupported""",
               'daily share import',
           )
-          controller = replace_once(
-              controller,
-              """    this.challenge = createDailyChallenge(getLocalDateKey());
-            /** @type {number | null} */
-            this.sharedScore = null;
-            this.invalidShare = false;
-            this.sharedChallenge = false;""",
-              """    this.challenge = createDailyChallenge(getLocalDateKey());
-            /** @type {number | null} */
-            this.sharedScore = null;
-            this.invalidShare = false;
-            this.shareUnavailable = false;
-            this.sharedChallenge = false;""",
-              'constructor share state',
+
+          state_needle = "    this.invalidShare = false;\n    this.sharedChallenge = false;"
+          if controller.count(state_needle) != 2:
+              raise SystemExit(
+                  f'Unexpected share-state shape: {controller.count(state_needle)} matches'
+              )
+          state_replacement = (
+              "    this.invalidShare = false;\n"
+              "    this.shareUnavailable = false;\n"
+              "    this.sharedChallenge = false;"
           )
+          controller = controller.replace(state_needle, state_replacement, 1)
+
           controller = replace_once(
               controller,
               """    const token = new URL(window.location.href).searchParams.get(SHARE_PARAM);
@@ -144,19 +142,11 @@ jobs:
             const score = game.scoreManager.score;""",
               'share action capability check',
           )
-          controller = replace_once(
-              controller,
-              """    this.challenge = createDailyChallenge(getLocalDateKey());
-            this.sharedScore = null;
-            this.invalidShare = false;
-            this.sharedChallenge = false;""",
-              """    this.challenge = createDailyChallenge(getLocalDateKey());
-            this.sharedScore = null;
-            this.invalidShare = false;
-            this.shareUnavailable = false;
-            this.sharedChallenge = false;""",
-              'exit share state reset',
-          )
+
+          if controller.count(state_needle) != 1:
+              raise SystemExit('Expected one remaining exit share-state block')
+          controller = controller.replace(state_needle, state_replacement, 1)
+
           controller = replace_once(
               controller,
               """    if (this.elements.warning instanceof HTMLElement) {
