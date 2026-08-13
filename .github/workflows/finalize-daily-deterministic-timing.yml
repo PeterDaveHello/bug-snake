@@ -1,0 +1,187 @@
+name: Finalize daily deterministic timing
+
+on:
+  push:
+    branches:
+      - agent/daily-bug-hunt-finalize-20260814
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: >-
+      github.actor == 'PeterDaveHello' &&
+      github.event.head_commit.message == 'Run isolated daily challenge finalizer'
+    runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: agent/daily-bug-hunt
+      RUNNER_BRANCH: agent/daily-bug-hunt-finalize-20260814
+      EXPECTED_HEAD: ea43a24611426e8f50be43c28b7766d11580546a
+      EXPECTED_BASE: de8e27a668cd367aee05235370fc7b60af0f3cfb
+
+    steps:
+      - name: Check out isolated runner branch
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Apply, validate, and squash the final fix
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git fetch --no-tags origin master "$TARGET_BRANCH"
+          test "$(git rev-parse "origin/$TARGET_BRANCH")" = "$EXPECTED_HEAD"
+          test "$(git rev-parse origin/master)" = "$EXPECTED_BASE"
+          git reset --hard "$EXPECTED_HEAD"
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          game_path = Path('scripts/core/game.js')
+          source = game_path.read_text()
+
+          old_call = """    const speedSmoothingOverride = manualBoosting || straightBoosting ? 0 : null;
+              const finalSpeed = this._getSmoothedSpeed(targetSpeedWithBoost, now, speedSmoothingOverride);"""
+          new_call = """    const speedSmoothingOverride = manualBoosting || straightBoosting ? 0 : null;
+              // Normal play keeps the existing wall-clock feel. Versioned daily runs
+              // advance smoothing from simulation time so catch-up rendering cannot
+              // change the speed/active-time sequence for the same gameplay inputs.
+              const smoothingElapsedMs =
+                this.challengeAlgorithmVersion === null
+                  ? Math.max(0, now - this._speedSmoothingLastAt)
+                  : activeTickStep * 1000;
+              this._speedSmoothingLastAt = now;
+              const finalSpeed = this._getSmoothedSpeed(
+                targetSpeedWithBoost,
+                smoothingElapsedMs,
+                speedSmoothingOverride
+              );"""
+          if source.count(old_call) != 1:
+              raise SystemExit('Expected exactly one speed-smoothing call site')
+          source = source.replace(old_call, new_call)
+
+          old_method = """  /**
+             * @param {number} targetSpeed
+             * @param {number} now
+             * @param {number | null} [smoothingMsOverride]
+             * @returns {number}
+             */
+            _getSmoothedSpeed(targetSpeed, now, smoothingMsOverride = null) {
+              const smoothingMs =
+                smoothingMsOverride === null ? this.gameplayRules.speedSmoothingMs : smoothingMsOverride;
+              if (smoothingMs <= 0) {
+                this._smoothedSpeed = targetSpeed;
+                this._speedSmoothingLastAt = now;
+                return targetSpeed;
+              }
+
+              const elapsed = Math.max(0, now - this._speedSmoothingLastAt);
+              this._speedSmoothingLastAt = now;
+
+              const ratio = Math.min(1, elapsed / smoothingMs);"""
+          new_method = """  /**
+             * @param {number} targetSpeed
+             * @param {number} elapsedMs
+             * @param {number | null} [smoothingMsOverride]
+             * @returns {number}
+             */
+            _getSmoothedSpeed(targetSpeed, elapsedMs, smoothingMsOverride = null) {
+              const smoothingMs =
+                smoothingMsOverride === null ? this.gameplayRules.speedSmoothingMs : smoothingMsOverride;
+              if (smoothingMs <= 0) {
+                this._smoothedSpeed = targetSpeed;
+                return targetSpeed;
+              }
+
+              const normalizedElapsedMs =
+                Number.isFinite(elapsedMs) && elapsedMs > 0 ? elapsedMs : 0;
+              const ratio = Math.min(1, normalizedElapsedMs / smoothingMs);"""
+          if source.count(old_method) != 1:
+              raise SystemExit('Expected exactly one speed-smoothing method')
+          source = source.replace(old_method, new_method)
+          if source.count('_getSmoothedSpeed(') != 2:
+              raise SystemExit('Unexpected additional speed-smoothing call sites')
+          game_path.write_text(source)
+
+          test_path = Path('scripts/tests/daily-review-contract-test.js')
+          test_source = test_path.read_text()
+          anchor = """assert(
+            !algorithmSource.includes('manager._isEnabled(') && !algorithmSource.includes('manager._getWeight('),
+            'Frozen daily-v1 selection code does not call ItemManager private rule helpers'
+          );
+
+          console.log(`\\nDaily review contract tests: ${passed} passed`);"""
+          replacement = """assert(
+            !algorithmSource.includes('manager._isEnabled(') && !algorithmSource.includes('manager._getWeight('),
+            'Frozen daily-v1 selection code does not call ItemManager private rule helpers'
+          );
+
+          const gameSource = fs.readFileSync(new URL('../core/game.js', import.meta.url), 'utf8');
+          assert(
+            gameSource.includes('const smoothingElapsedMs =') &&
+              gameSource.includes('this.challengeAlgorithmVersion === null') &&
+              gameSource.includes(': activeTickStep * 1000;') &&
+              gameSource.includes('_getSmoothedSpeed(targetSpeed, elapsedMs') &&
+              !gameSource.includes('_getSmoothedSpeed(targetSpeedWithBoost, now,'),
+            'Daily speed smoothing advances from simulation time instead of frame wall-clock timing'
+          );
+
+          console.log(`\\nDaily review contract tests: ${passed} passed`);"""
+          if test_source.count(anchor) != 1:
+              raise SystemExit('Expected one daily review test insertion point')
+          test_path.write_text(test_source.replace(anchor, replacement))
+          PY
+
+          npm ci
+          npx prettier --write scripts/core/game.js scripts/tests/daily-review-contract-test.js
+          npm run check
+          npm run check:quality
+
+          mapfile -t changed < <(git diff --name-only "$EXPECTED_HEAD")
+          printf 'Changed files:\n%s\n' "${changed[@]}"
+          test "${#changed[@]}" -eq 2
+          test "${changed[0]}" = 'scripts/core/game.js'
+          test "${changed[1]}" = 'scripts/tests/daily-review-contract-test.js'
+
+          git config user.name 'Peter Dave Hello'
+          git config user.email '3691490+PeterDaveHello@users.noreply.github.com'
+          git reset --soft origin/master
+          git add -A
+          now="$(TZ=Asia/Taipei date '+%Y-%m-%dT%H:%M:%S%z')"
+          GIT_AUTHOR_DATE="$now" GIT_COMMITTER_DATE="$now" \
+            git commit \
+              -m 'Add daily bug hunt challenges' \
+              -m 'Add deterministic daily challenges with versioned gameplay, resilient local records, offline share links, and simulation-time speed smoothing for reproducible rule timing.'
+
+          test "$(git rev-list --count origin/master..HEAD)" -eq 1
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_BASE"
+          test -z "$(git diff --name-only HEAD -- .github/workflows/finalize-daily-deterministic-timing.yml)"
+          new_sha="$(git rev-parse HEAD)"
+          echo "new_sha=$new_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Force-push the validated single commit and remove the runner branch
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NEW_SHA: ${{ steps.build.outputs.new_sha }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$GITHUB_TOKEN"
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          remote_head="$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | awk '{print $1}')"
+          test "$remote_head" = "$EXPECTED_HEAD"
+          git push --no-verify \
+            --force-with-lease="refs/heads/$TARGET_BRANCH:$EXPECTED_HEAD" \
+            origin "$NEW_SHA:refs/heads/$TARGET_BRANCH"
+          git push --no-verify origin ":refs/heads/$RUNNER_BRANCH"
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
