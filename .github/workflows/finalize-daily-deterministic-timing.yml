@@ -52,6 +52,7 @@ jobs:
 
           python3 - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           def replace_once(source, old, new, label):
@@ -59,6 +60,12 @@ jobs:
               if count != 1:
                   raise SystemExit(f'Unexpected source shape for {label}: {count} matches')
               return source.replace(old, new)
+
+          def sub_once(source, pattern, replacement, label):
+              result, count = re.subn(pattern, replacement, source, count=1, flags=re.MULTILINE)
+              if count != 1:
+                  raise SystemExit(f'Unexpected source shape for {label}: {count} matches')
+              return result
 
           daily_path = Path('scripts/core/daily-challenge.js')
           daily = daily_path.read_text()
@@ -70,7 +77,7 @@ jobs:
             }
           }""",
               """/**
-           * @param {Crypto | undefined} [cryptoApi]
+           * @param {Crypto | null | undefined} [cryptoApi]
            * @returns {boolean}
            */
           export function isDailyShareSupported(cryptoApi = globalThis.crypto) {
@@ -112,34 +119,16 @@ jobs:
           )
           controller = controller.replace(state_needle, state_replacement, 1)
 
-          controller = replace_once(
+          controller = sub_once(
               controller,
-              """    const token = new URL(window.location.href).searchParams.get(SHARE_PARAM);
-            if (!token) return;
-
-            try {""",
-              """    const token = new URL(window.location.href).searchParams.get(SHARE_PARAM);
-            if (!token) return;
-            if (!isDailyShareSupported()) {
-              this.shareUnavailable = true;
-              return;
-            }
-
-            try {""",
+              r"(?m)^(\s*const token = new URL\(window\.location\.href\)\.searchParams\.get\(SHARE_PARAM\);\n\s*if \(!token\) return;\n)",
+              r"\1    if (!isDailyShareSupported()) {\n      this.shareUnavailable = true;\n      return;\n    }\n",
               'shared-link capability check',
           )
-          controller = replace_once(
+          controller = sub_once(
               controller,
-              """  async _shareResult() {
-            if (!this.active || !this.completed) return;
-            const score = game.scoreManager.score;""",
-              """  async _shareResult() {
-            if (!this.active || !this.completed) return;
-            if (!isDailyShareSupported()) {
-              game.showToast(i18n.t('daily.shareUnavailable'), 5000);
-              return;
-            }
-            const score = game.scoreManager.score;""",
+              r"(?m)^(\s*async _shareResult\(\) \{\n\s*if \(!this\.active \|\| !this\.completed\) return;\n)(\s*const score = game\.scoreManager\.score;)",
+              r"\1    if (!isDailyShareSupported()) {\n      game.showToast(i18n.t('daily.shareUnavailable'), 5000);\n      return;\n    }\n\2",
               'share action capability check',
           )
 
@@ -147,12 +136,9 @@ jobs:
               raise SystemExit('Expected one remaining exit share-state block')
           controller = controller.replace(state_needle, state_replacement, 1)
 
-          controller = replace_once(
+          controller = sub_once(
               controller,
-              """    if (this.elements.warning instanceof HTMLElement) {
-              this.elements.warning.hidden = !this.invalidShare;
-              this.elements.warning.textContent = this.invalidShare ? i18n.t('daily.invalidShare') : '';
-            }""",
+              r"(?ms)^    if \(this\.elements\.warning instanceof HTMLElement\) \{\n\s*this\.elements\.warning\.hidden = !this\.invalidShare;\n\s*this\.elements\.warning\.textContent = this\.invalidShare \? i18n\.t\('daily\.invalidShare'\) : '';\n\s*\}",
               """    if (this.elements.warning instanceof HTMLElement) {
               const warningText = this.shareUnavailable
                 ? i18n.t('daily.shareUnavailable')
@@ -189,7 +175,7 @@ jobs:
             'Daily sharing detects Web Crypto in the normal test environment'
           );
           assert(
-            !isDailyShareSupported(undefined),
+            !isDailyShareSupported(null),
             'Daily sharing reports unsupported environments before encoding or decoding links'
           );
 
