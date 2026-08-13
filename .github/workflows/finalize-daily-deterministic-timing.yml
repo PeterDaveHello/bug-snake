@@ -1,13 +1,272 @@
-name: Retired daily challenge finalizer
+name: Finalize daily share context UX
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - agent/daily-bug-hunt-finalize-20260814
 
-permissions: {}
+permissions:
+  contents: write
 
 jobs:
-  retired:
+  finalize:
+    if: >-
+      github.actor == 'PeterDaveHello' &&
+      github.event.head_commit.message == 'Run isolated daily share-context fix'
     runs-on: ubuntu-latest
+    env:
+      TARGET_BRANCH: agent/daily-bug-hunt
+      EXPECTED_HEAD: f8f3730369b0266d1180ccdaf5ae852246ee614f
+      EXPECTED_BASE: de8e27a668cd367aee05235370fc7b60af0f3cfb
+
     steps:
-      - name: Retired
-        run: echo 'This isolated finalizer has completed and performs no repository writes.'
+      - name: Check out isolated runner branch
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Apply and validate secure-context messaging
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          deadline_epoch="$(TZ=Asia/Taipei date -d '2026-08-14 08:30:00' +%s)"
+          now_epoch="$(date +%s)"
+          if (( now_epoch >= deadline_epoch )); then
+            echo 'Refusing to publish at or after 08:30 Asia/Taipei' >&2
+            exit 1
+          fi
+
+          git fetch --no-tags origin master "$TARGET_BRANCH"
+          test "$(git rev-parse "origin/$TARGET_BRANCH")" = "$EXPECTED_HEAD"
+          test "$(git rev-parse origin/master)" = "$EXPECTED_BASE"
+          git reset --hard "$EXPECTED_HEAD"
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          daily_path = Path('scripts/core/daily-challenge.js')
+          daily = daily_path.read_text()
+          old = """function ensureWebCrypto() {
+            if (!globalThis.crypto?.subtle || !globalThis.crypto.getRandomValues) {
+              throw new Error('Web Crypto API is unavailable');
+            }
+          }"""
+          new = """/**
+           * @param {Crypto | undefined} [cryptoApi]
+           * @returns {boolean}
+           */
+          export function isDailyShareSupported(cryptoApi = globalThis.crypto) {
+            return Boolean(cryptoApi?.subtle && typeof cryptoApi.getRandomValues === 'function');
+          }
+
+          function ensureWebCrypto() {
+            if (!isDailyShareSupported()) {
+              throw new Error('Web Crypto API is unavailable');
+            }
+          }"""
+          if daily.count(old) != 1:
+            raise SystemExit('Unexpected Web Crypto guard shape')
+          daily_path.write_text(daily.replace(old, new))
+
+          controller_path = Path('scripts/ui/daily-challenge-controller.js')
+          controller = controller_path.read_text()
+          replacements = [
+            (
+              """  decodeDailyShare,
+            encodeDailyShare,
+            getLocalDateKey""",
+              """  decodeDailyShare,
+            encodeDailyShare,
+            getLocalDateKey,
+            isDailyShareSupported""",
+              'daily share import',
+            ),
+            (
+              """    this.invalidShare = false;
+            this.sharedChallenge = false;""",
+              """    this.invalidShare = false;
+            this.shareUnavailable = false;
+            this.sharedChallenge = false;""",
+              'constructor share state',
+            ),
+            (
+              """    const token = new URL(window.location.href).searchParams.get(SHARE_PARAM);
+            if (!token) return;
+
+            try {""",
+              """    const token = new URL(window.location.href).searchParams.get(SHARE_PARAM);
+            if (!token) return;
+            if (!isDailyShareSupported()) {
+              this.shareUnavailable = true;
+              return;
+            }
+
+            try {""",
+              'shared-link capability check',
+            ),
+            (
+              """  async _shareResult() {
+            if (!this.active || !this.completed) return;
+            const score = game.scoreManager.score;""",
+              """  async _shareResult() {
+            if (!this.active || !this.completed) return;
+            if (!isDailyShareSupported()) {
+              game.showToast(i18n.t('daily.shareUnavailable'), 5000);
+              return;
+            }
+            const score = game.scoreManager.score;""",
+              'share action capability check',
+            ),
+            (
+              """    this.sharedScore = null;
+            this.invalidShare = false;
+            this.sharedChallenge = false;""",
+              """    this.sharedScore = null;
+            this.invalidShare = false;
+            this.shareUnavailable = false;
+            this.sharedChallenge = false;""",
+              'exit share state reset',
+            ),
+            (
+              """    if (this.elements.warning instanceof HTMLElement) {
+              this.elements.warning.hidden = !this.invalidShare;
+              this.elements.warning.textContent = this.invalidShare ? i18n.t('daily.invalidShare') : '';
+            }""",
+              """    if (this.elements.warning instanceof HTMLElement) {
+              const warningText = this.shareUnavailable
+                ? i18n.t('daily.shareUnavailable')
+                : this.invalidShare
+                  ? i18n.t('daily.invalidShare')
+                  : '';
+              this.elements.warning.hidden = !warningText;
+              this.elements.warning.textContent = warningText;
+            }""",
+              'share warning rendering',
+            ),
+          ]
+          for old_text, new_text, label in replacements:
+            if controller.count(old_text) != 1:
+              raise SystemExit(f'Unexpected controller shape for {label}')
+            controller = controller.replace(old_text, new_text)
+          controller_path.write_text(controller)
+
+          test_path = Path('scripts/tests/daily-challenge-test.js')
+          test = test_path.read_text()
+          old_import = """  createDailyChallenge,
+            decodeDailyShare,
+            encodeDailyShare
+          } from '../core/daily-challenge.js';"""
+          new_import = """  createDailyChallenge,
+            decodeDailyShare,
+            encodeDailyShare,
+            isDailyShareSupported
+          } from '../core/daily-challenge.js';"""
+          if test.count(old_import) != 1:
+            raise SystemExit('Unexpected daily challenge test import block')
+          test = test.replace(old_import, new_import)
+          anchor = """  const first = createDailyChallenge('2026-08-10');"""
+          addition = """  assert(
+            isDailyShareSupported(globalThis.crypto),
+            'Daily sharing detects Web Crypto in the normal test environment'
+          );
+          assert(
+            !isDailyShareSupported(undefined),
+            'Daily sharing reports unsupported environments before encoding or decoding links'
+          );
+
+          const first = createDailyChallenge('2026-08-10');"""
+          if test.count(anchor) != 1:
+            raise SystemExit('Unexpected daily challenge test insertion point')
+          test_path.write_text(test.replace(anchor, addition))
+
+          translations = {
+            'ar-SA': 'لا يمكن لهذه البيئة إنشاء روابط المشاركة أو التحقق منها. افتح اللعبة عبر HTTPS أو localhost.',
+            'bn-BD': 'এই পরিবেশে শেয়ার লিঙ্ক তৈরি বা যাচাই করা যায় না। HTTPS বা localhost দিয়ে গেমটি খুলুন।',
+            'de-DE': 'In dieser Umgebung können Freigabelinks nicht erstellt oder geprüft werden. Öffne das Spiel über HTTPS oder localhost.',
+            'en-US': 'This environment cannot create or verify share links. Open the game over HTTPS or localhost.',
+            'es-ES': 'Este entorno no puede crear ni verificar enlaces compartidos. Abre el juego mediante HTTPS o localhost.',
+            'fa-IR': 'این محیط نمی‌تواند پیوندهای اشتراک‌گذاری را ایجاد یا تأیید کند. بازی را از طریق HTTPS یا localhost باز کنید.',
+            'fr-FR': 'Cet environnement ne peut pas créer ni vérifier les liens de partage. Ouvrez le jeu via HTTPS ou localhost.',
+            'hi-IN': 'यह वातावरण शेयर लिंक बना या सत्यापित नहीं कर सकता। गेम को HTTPS या localhost पर खोलें।',
+            'id-ID': 'Lingkungan ini tidak dapat membuat atau memverifikasi tautan berbagi. Buka game melalui HTTPS atau localhost.',
+            'it-IT': 'Questo ambiente non può creare o verificare link condivisi. Apri il gioco tramite HTTPS o localhost.',
+            'ja-JP': 'この環境では共有リンクを作成または検証できません。HTTPS または localhost でゲームを開いてください。',
+            'ko-KR': '현재 환경에서는 공유 링크를 만들거나 확인할 수 없습니다. HTTPS 또는 localhost에서 게임을 여세요.',
+            'nl-NL': 'In deze omgeving kunnen gedeelde links niet worden gemaakt of geverifieerd. Open het spel via HTTPS of localhost.',
+            'pl-PL': 'W tym środowisku nie można tworzyć ani weryfikować linków udostępniania. Otwórz grę przez HTTPS lub localhost.',
+            'pt-BR': 'Este ambiente não pode criar nem verificar links compartilhados. Abra o jogo via HTTPS ou localhost.',
+            'ru-RU': 'В этой среде нельзя создавать или проверять ссылки для обмена. Откройте игру через HTTPS или localhost.',
+            'th-TH': 'สภาพแวดล้อมนี้ไม่สามารถสร้างหรือตรวจสอบลิงก์แชร์ได้ โปรดเปิดเกมผ่าน HTTPS หรือ localhost',
+            'tr-TR': 'Bu ortam paylaşım bağlantıları oluşturamaz veya doğrulayamaz. Oyunu HTTPS ya da localhost üzerinden açın.',
+            'ur-PK': 'یہ ماحول شیئر لنکس بنا یا تصدیق نہیں کر سکتا۔ گیم کو HTTPS یا localhost کے ذریعے کھولیں۔',
+            'vi-VN': 'Môi trường này không thể tạo hoặc xác minh liên kết chia sẻ. Hãy mở trò chơi qua HTTPS hoặc localhost.',
+            'zh-CN': '当前环境无法创建或验证分享链接。请使用 HTTPS 或 localhost 打开游戏。',
+            'zh-TW': '目前環境無法建立或驗證分享連結。請使用 HTTPS 或 localhost 開啟遊戲。',
+          }
+          locales = json.loads(Path('i18n/index.json').read_text())
+          if set(locales) != set(translations):
+            raise SystemExit('Translation map does not match locale index')
+          for locale in locales:
+            path = Path('i18n') / f'{locale}.json'
+            data = json.loads(path.read_text())
+            daily = data.get('daily')
+            if not isinstance(daily, dict) or 'invalidShare' not in daily:
+              raise SystemExit(f'Unexpected daily locale shape: {locale}')
+            daily['shareUnavailable'] = translations[locale]
+            path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + '\n')
+          PY
+
+          npm ci
+          npx prettier --write scripts/core/daily-challenge.js scripts/ui/daily-challenge-controller.js scripts/tests/daily-challenge-test.js i18n/*.json
+          npm run check
+          npm run check:quality
+
+          git diff --check
+          test "$(git diff --name-only "$EXPECTED_HEAD" | wc -l)" -eq 25
+          test "$(git diff --name-only "$EXPECTED_HEAD" | grep -c '^i18n/.*\.json$')" -eq 22
+          test "$(git diff --name-only "$EXPECTED_HEAD" | grep -c '^scripts/core/daily-challenge.js$')" -eq 1
+          test "$(git diff --name-only "$EXPECTED_HEAD" | grep -c '^scripts/ui/daily-challenge-controller.js$')" -eq 1
+          test "$(git diff --name-only "$EXPECTED_HEAD" | grep -c '^scripts/tests/daily-challenge-test.js$')" -eq 1
+
+          git config user.name 'Peter Dave Hello'
+          git config user.email '3691490+PeterDaveHello@users.noreply.github.com'
+          git reset --soft origin/master
+          git add -A
+          now="$(TZ=Asia/Taipei date '+%Y-%m-%dT%H:%M:%S%z')"
+          GIT_AUTHOR_DATE="$now" GIT_COMMITTER_DATE="$now" \
+            git commit \
+              -m 'Add daily bug hunt challenges' \
+              -m 'Add deterministic daily challenges with resilient sharing, versioned gameplay, offline navigation, and clear secure-context messaging for local testing.'
+
+          test "$(git rev-list --count origin/master..HEAD)" -eq 1
+          test "$(git rev-parse HEAD^)" = "$EXPECTED_BASE"
+          if git cat-file -e 'HEAD:.github/workflows/finalize-daily-deterministic-timing.yml' 2>/dev/null; then
+            echo 'Temporary finalizer unexpectedly entered the PR tree' >&2
+            exit 1
+          fi
+          echo "new_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Force-push validated single commit
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          NEW_SHA: ${{ steps.build.outputs.new_sha }}
+        run: |
+          set -euo pipefail
+          echo "::add-mask::$GITHUB_TOKEN"
+          remote_head="$(git ls-remote "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "refs/heads/$TARGET_BRANCH" | awk '{print $1}')"
+          test "$remote_head" = "$EXPECTED_HEAD"
+          git push --no-verify \
+            --force-with-lease="refs/heads/$TARGET_BRANCH:$EXPECTED_HEAD" \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            "$NEW_SHA:refs/heads/$TARGET_BRANCH"
