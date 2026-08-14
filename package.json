@@ -46,6 +46,6 @@
     "prettier": "^3.6.2",
     "stylelint": "^17.0.0",
     "stylelint-config-recommended": "^18.0.0",
-    "typescript": "^5.3.3"
+    "typescript": "^7.0.0"
   }
 }
