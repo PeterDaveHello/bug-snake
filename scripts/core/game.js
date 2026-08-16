@@ -7,8 +7,10 @@ import { MapGenerator, MapTemplate } from '../maps/map-generator.js';
 import { ParticleSystem } from '../render/particles.js';
 import { Renderer } from '../render/renderer.js';
 import { isEditableElement, setElementText, setElementVisible } from '../utils/dom.js';
+import { isPlainLetterShortcut } from '../utils/keyboard-shortcut.js';
 
 import { GameConfig, SpeedMode, PoisonMode, ItemType } from './config.js';
+import { createDailyV1ItemAlgorithm } from './daily-v1-algorithm.js';
 import { GameLoop } from './game-loop.js';
 import { Grid } from './grid.js';
 import { ItemManager } from './item-manager.js';
@@ -19,6 +21,32 @@ import { TimeManager } from './time-manager.js';
 
 const ALL_DIRECTIONS = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT];
 
+/**
+ * @typedef {Object} GameplayRules
+ * @property {number} defaultSpeed
+ * @property {number} maxSpeed
+ * @property {number} minSpeed
+ * @property {number} scoreSpeedStep
+ * @property {number} scoreSpeedMax
+ * @property {number} timeSpeedStep
+ * @property {number} timeSpeedMax
+ * @property {number} boostSpeedDelta
+ * @property {number} manualBoostSpeedDelta
+ * @property {number} inputGraceMs
+ * @property {number} speedSmoothingMs
+ * @property {number} poisonShrinkAmount
+ */
+
+/**
+ * @typedef {Object} ItemDefinition
+ * @property {number} score
+ * @property {number} length
+ * @property {number} weight
+ * @property {string} color
+ * @property {number} [speedBoost]
+ * @property {boolean} [isPoison]
+ */
+
 export class Game {
   constructor() {
     this.config = { ...GameConfig.defaults };
@@ -27,9 +55,15 @@ export class Game {
 
     this.gameMode = 'classic';
     this.pendingMode = this.gameMode;
+    /** @type {number | null} */
+    this.challengeAlgorithmVersion = null;
 
     this.scoreManager = new ScoreManager();
     this.timeManager = new TimeManager();
+    /** @type {Readonly<GameplayRules>} */
+    this.gameplayRules = GameConfig.rules;
+    /** @type {Readonly<Record<string, Readonly<ItemDefinition>>>} */
+    this.itemDefinitions = GameConfig.items;
 
     this.settings = {
       mapTemplate: MapTemplate.EMPTY,
@@ -66,7 +100,13 @@ export class Game {
       }
     };
 
-    this.itemManager = new ItemManager(this.grid, this.snake, this.settings);
+    this.itemManager = new ItemManager(
+      this.grid,
+      this.snake,
+      this.settings,
+      this.itemDefinitions,
+      null
+    );
     this.mapGenerator = new MapGenerator(this.grid);
     this.ai = new AIPilot(this.grid, this.snake, this.itemManager);
 
@@ -176,7 +216,11 @@ export class Game {
     this.grid.size = this.settings.mapSize;
     this.grid.wrapWalls = this.settings.wrapWalls;
 
-    this.mapGenerator.generate(this.settings.mapTemplate, seed, density);
+    const itemAlgorithm =
+      this.challengeAlgorithmVersion === 1
+        ? createDailyV1ItemAlgorithm(this.grid, this.settings.mapTemplate, seed, density)
+        : null;
+    if (!itemAlgorithm) this.mapGenerator.generate(this.settings.mapTemplate, seed, density);
     audio.setMusicProfile({
       seed,
       density,
@@ -186,7 +230,13 @@ export class Game {
 
     this.snake = new Snake(this.grid, this.settings.startLength);
     this._clearSnakeObstacles();
-    this.itemManager = new ItemManager(this.grid, this.snake, this.settings);
+    this.itemManager = new ItemManager(
+      this.grid,
+      this.snake,
+      this.settings,
+      this.itemDefinitions,
+      itemAlgorithm
+    );
     this.itemManager.snake = this.snake;
 
     this.ai.grid = this.grid;
@@ -195,7 +245,7 @@ export class Game {
     this.ai.currentPath = [];
 
     this.scoreManager.reset(this.gameMode);
-    this.timeManager.reset(this.gameMode, this.settings);
+    this.timeManager.reset(this.gameMode, this.settings, this.gameplayRules);
     this.resetAiPerformance();
     audio.duck(false);
     audio._resetCombo();
@@ -228,20 +278,23 @@ export class Game {
     }
     if (gameState.currentState !== GameState.PLAYING) return;
 
-    this.particles.update();
-
     let waitingHeldDirection = null;
-    const now = performance.now();
     if (this.waitingForInput && !this.ai.enabled) {
-      if (!inputManager.hasQueuedDirection() && !inputManager.heldDirection) {
-        this.timeManager._lastSpeedCheck = now;
-        return;
-      }
+      if (!inputManager.hasQueuedDirection() && !inputManager.heldDirection) return;
       if (!inputManager.hasQueuedDirection() && inputManager.heldDirection) {
         waitingHeldDirection = inputManager.heldDirection;
       }
       this.waitingForInput = false;
     }
+
+    // Timed rules advance by the nominal gameplay step, not GameLoop's
+    // frame-pacing tickStep. Slow rendering may reduce wall-clock throughput,
+    // but it must not change how many rule-seconds each snake move consumes.
+    const activeTickStep = this.loop.step || 1 / 15;
+    const rules = this.gameplayRules;
+    const now = performance.now();
+
+    this.particles.update();
 
     const targetSpeed = this.timeManager.calculateSpeed(now, this.scoreManager.score);
     const manualBoosting = inputManager.isBoostActive();
@@ -250,15 +303,27 @@ export class Game {
       : inputManager.isHoldingCurrentDirection(this.snake.direction);
     let boostDelta = 0;
     if (manualBoosting) {
-      boostDelta = GameConfig.rules.manualBoostSpeedDelta;
+      boostDelta = rules.manualBoostSpeedDelta;
     } else if (straightBoosting) {
-      boostDelta = GameConfig.rules.boostSpeedDelta;
+      boostDelta = rules.boostSpeedDelta;
     }
     const targetSpeedWithBoost = boostDelta
-      ? Math.min(targetSpeed + boostDelta, GameConfig.rules.maxSpeed)
+      ? Math.min(targetSpeed + boostDelta, rules.maxSpeed)
       : targetSpeed;
     const speedSmoothingOverride = manualBoosting || straightBoosting ? 0 : null;
-    const finalSpeed = this._getSmoothedSpeed(targetSpeedWithBoost, now, speedSmoothingOverride);
+    // Normal play keeps the existing wall-clock feel. Versioned daily runs
+    // advance smoothing from simulation time so catch-up rendering cannot
+    // change the speed/active-time sequence for the same gameplay inputs.
+    const smoothingElapsedMs =
+      this.challengeAlgorithmVersion === null
+        ? Math.max(0, now - this._speedSmoothingLastAt)
+        : activeTickStep * 1000;
+    this._speedSmoothingLastAt = now;
+    const finalSpeed = this._getSmoothedSpeed(
+      targetSpeedWithBoost,
+      smoothingElapsedMs,
+      speedSmoothingOverride
+    );
     if (Math.abs(this.loop.fpsTarget - finalSpeed) > 0.01) {
       this.loop.setSpeed(finalSpeed);
       this._updateHUD();
@@ -312,7 +377,7 @@ export class Game {
       if (
         lastInputAt > 0 &&
         lastInputAt !== this._lastInputGraceAppliedAt &&
-        Date.now() - lastInputAt <= GameConfig.rules.inputGraceMs
+        Date.now() - lastInputAt <= rules.inputGraceMs
       ) {
         this._lastInputGraceAppliedAt = lastInputAt;
         return;
@@ -344,13 +409,14 @@ export class Game {
       return;
     }
 
-    this.itemManager.tick(0, now);
+    this.itemManager.tick(activeTickStep, now);
+    this.timeManager.advanceActiveTime(activeTickStep);
 
     const head = this.snake.getHead();
     const hitItemType = this.itemManager.checkCollision(head.x, head.y);
 
     if (hitItemType) {
-      const def = GameConfig.items[hitItemType];
+      const def = this.itemDefinitions[hitItemType];
       if (def && def.score > 0) {
         this.itemManager.recordConsumption();
       }
@@ -359,7 +425,7 @@ export class Game {
   }
 
   _handleItemCollection(type, head, now) {
-    const def = GameConfig.items[type];
+    const def = this.itemDefinitions[type];
     if (!def) return;
 
     this.scoreManager.add(def.score);
@@ -389,7 +455,7 @@ export class Game {
     let lengthChange = def.length;
 
     if (type === ItemType.POISON && this.settings.poisonMode === PoisonMode.SHRINK) {
-      lengthChange = -GameConfig.rules.poisonShrinkAmount;
+      lengthChange = -this.gameplayRules.poisonShrinkAmount;
     }
 
     const projectedLength = Math.max(1, currentLength + lengthChange);
@@ -410,7 +476,7 @@ export class Game {
       return;
     }
 
-    this.snake.shrink(GameConfig.rules.poisonShrinkAmount);
+    this.snake.shrink(this.gameplayRules.poisonShrinkAmount);
   }
 
   _handleStandardItem(type, head, def) {
@@ -458,7 +524,13 @@ export class Game {
     const levelSeed = this.config.seed + this.level;
     const levelDensity = Math.min(0.25, this.settings.obstacleDensity + 0.02 * this.level);
 
-    this.mapGenerator.generate(this.settings.mapTemplate, levelSeed, levelDensity);
+    const itemAlgorithm =
+      this.challengeAlgorithmVersion === 1
+        ? createDailyV1ItemAlgorithm(this.grid, this.settings.mapTemplate, levelSeed, levelDensity)
+        : null;
+    if (!itemAlgorithm) {
+      this.mapGenerator.generate(this.settings.mapTemplate, levelSeed, levelDensity);
+    }
     audio.setMusicProfile({
       seed: levelSeed,
       density: levelDensity,
@@ -468,7 +540,13 @@ export class Game {
 
     this.snake = new Snake(this.grid, this.settings.startLength);
     this._clearSnakeObstacles();
-    this.itemManager = new ItemManager(this.grid, this.snake, this.settings);
+    this.itemManager = new ItemManager(
+      this.grid,
+      this.snake,
+      this.settings,
+      this.itemDefinitions,
+      itemAlgorithm
+    );
     this.itemManager.snake = this.snake;
 
     this.ai.grid = this.grid;
@@ -651,7 +729,7 @@ export class Game {
         this.pause();
       }
 
-      if (e.key === 'I' || e.key === 'i') {
+      if (isPlainLetterShortcut(e, 'i')) {
         if (
           gameState.currentState === GameState.PLAYING ||
           gameState.currentState === GameState.PAUSED
@@ -662,7 +740,7 @@ export class Game {
         }
       }
 
-      if (e.key === 'P' || e.key === 'p') {
+      if (isPlainLetterShortcut(e, 'p')) {
         if (
           gameState.currentState === GameState.PLAYING ||
           gameState.currentState === GameState.PAUSED
@@ -741,23 +819,20 @@ export class Game {
 
   /**
    * @param {number} targetSpeed
-   * @param {number} now
+   * @param {number} elapsedMs
    * @param {number | null} [smoothingMsOverride]
    * @returns {number}
    */
-  _getSmoothedSpeed(targetSpeed, now, smoothingMsOverride = null) {
+  _getSmoothedSpeed(targetSpeed, elapsedMs, smoothingMsOverride = null) {
     const smoothingMs =
-      smoothingMsOverride === null ? GameConfig.rules.speedSmoothingMs : smoothingMsOverride;
+      smoothingMsOverride === null ? this.gameplayRules.speedSmoothingMs : smoothingMsOverride;
     if (smoothingMs <= 0) {
       this._smoothedSpeed = targetSpeed;
-      this._speedSmoothingLastAt = now;
       return targetSpeed;
     }
 
-    const elapsed = Math.max(0, now - this._speedSmoothingLastAt);
-    this._speedSmoothingLastAt = now;
-
-    const ratio = Math.min(1, elapsed / smoothingMs);
+    const normalizedElapsedMs = Number.isFinite(elapsedMs) && elapsedMs > 0 ? elapsedMs : 0;
+    const ratio = Math.min(1, normalizedElapsedMs / smoothingMs);
     this._smoothedSpeed += (targetSpeed - this._smoothedSpeed) * ratio;
     if (Math.abs(this._smoothedSpeed - targetSpeed) < 0.05) {
       this._smoothedSpeed = targetSpeed;

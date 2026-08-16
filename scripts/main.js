@@ -69,11 +69,18 @@ class GameApp {
       if (container && screenId !== 'loading-screen') {
         container.inert = true;
       }
-      // Auto-focus first button for accessibility
-      const firstBtn = screen.querySelector('button');
-      if (firstBtn) {
-        setTimeout(() => firstBtn.focus(), 50);
-      }
+      // Resolve the focus target after state listeners and CSS visibility have
+      // settled. A daily-result panel can become visible in the same transition,
+      // and capturing a button before that update would focus a stale control.
+      setTimeout(() => {
+        if (!screen.classList.contains('active')) return;
+        const firstBtn = [...screen.querySelectorAll('button')].find((button) => {
+          if (button.disabled || button.hidden || button.closest('[hidden]')) return false;
+          const style = window.getComputedStyle(button);
+          return style.display !== 'none' && style.visibility !== 'hidden';
+        });
+        if (firstBtn instanceof HTMLButtonElement) firstBtn.focus();
+      }, 50);
     }
   }
 
@@ -397,7 +404,9 @@ class GameApp {
             // On mobile, the settings panel is the full-screen overlay — showing
             // the pause screen on top would set game-container.inert and block all
             // panel interactions (folders, close button). Skip it when panel is open.
-            const panelActive = document.getElementById('controls-panel')?.classList.contains('active');
+            const panelActive = document
+              .getElementById('controls-panel')
+              ?.classList.contains('active');
             if (!(panelActive && this._isMobileLayout())) {
               this._showScreen('pause-screen');
             }
@@ -559,6 +568,17 @@ class GameApp {
    * @param {{ randomize?: boolean }} options
    */
   _restartWithDefault(options = {}) {
+    // Daily results are persisted when DYING reaches GAME_OVER. Block every
+    // HUD, mobile, and keyboard restart path during that short animation so
+    // a completed run cannot skip its result and attempt count.
+    const dailyDeathPending = Boolean(
+      document.body.classList.contains('daily-challenge-active') &&
+      this._gameState &&
+      this._GameState &&
+      this._gameState.currentState === this._GameState.DYING
+    );
+    if (dailyDeathPending) return;
+
     const shouldRandomize =
       typeof options.randomize === 'boolean'
         ? options.randomize
@@ -715,6 +735,14 @@ class GameApp {
 
     const isPlainA = isPlainLetterShortcut(event, 'a');
     const isPlainL = isPlainLetterShortcut(event, 'l');
+    const normalizedKey = typeof event.key === 'string' ? event.key.toLowerCase() : '';
+    const isRestartShortcut =
+      !event.repeat &&
+      !event.isComposing &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey &&
+      normalizedKey === 'r';
 
     const overActive = document.getElementById('game-over-screen')?.classList.contains('active');
     const timeActive = document.getElementById('time-up-screen')?.classList.contains('active');
@@ -779,7 +807,7 @@ class GameApp {
       return;
     }
 
-    if (event.key === 'R' || event.key === 'r') {
+    if (isRestartShortcut) {
       // Handle restart from overlay screens
       if (overActive || timeActive) {
         const btnId = event.shiftKey
@@ -812,6 +840,13 @@ class GameApp {
 }
 
 const app = new GameApp();
+
+export function returnToTitleScreen() {
+  app._closeOverlayScreens();
+  audio.duck(false);
+  app._showScreen('title-screen');
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   app.init().catch((err) => {
     app._handleInitError(err);

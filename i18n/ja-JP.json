@@ -192,5 +192,23 @@
   "tutorial": {
     "title": "チュートリアル",
     "rules": "ルール概要"
+  },
+  "daily": {
+    "title": "デイリーバグハント",
+    "start": "デイリーチャレンジ開始",
+    "best": "今日のベスト: {score}",
+    "completedRuns": "完了回数: {count}",
+    "friendScore": "フレンドのスコア: {score}",
+    "invalidShare": "共有されたチャレンジリンクが無効、または変更されています。",
+    "resultTitle": "デイリーチャレンジ完了",
+    "newBest": "今日のベストを更新！",
+    "disclaimer": "共有スコアはサーバーで検証されていません。",
+    "share": "結果を共有",
+    "exit": "タイトルに戻る",
+    "shareCopied": "チャレンジリンクをコピーしました。",
+    "shareFallback": "このチャレンジリンクをコピーしてください:",
+    "rulesLocked": "デイリーチャレンジのルールは固定されています。",
+    "rules": "{map} · {speed} · 毒: {poison}",
+    "shareUnavailable": "この環境では共有リンクを作成または検証できません。HTTPS または localhost でゲームを開いてください。"
   }
 }

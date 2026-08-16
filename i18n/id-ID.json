@@ -192,5 +192,23 @@
   "tutorial": {
     "title": "Tutorial",
     "rules": "Ringkasan aturan"
+  },
+  "daily": {
+    "title": "Perburuan Serangga Harian",
+    "start": "Mulai Tantangan Harian",
+    "best": "Terbaik Hari Ini: {score}",
+    "completedRuns": "Putaran selesai: {count}",
+    "friendScore": "Skor Teman: {score}",
+    "invalidShare": "Tautan tantangan yang dibagikan tidak valid atau telah diubah.",
+    "resultTitle": "Tantangan Harian Selesai",
+    "newBest": "Rekor harian baru!",
+    "disclaimer": "Skor yang dibagikan tidak diverifikasi oleh server.",
+    "share": "Bagikan Hasil",
+    "exit": "Kembali ke Judul",
+    "shareCopied": "Tautan tantangan disalin.",
+    "shareFallback": "Salin tautan tantangan ini:",
+    "rulesLocked": "Aturan tantangan harian dikunci.",
+    "rules": "{map} · {speed} · Racun: {poison}",
+    "shareUnavailable": "Lingkungan ini tidak dapat membuat atau memverifikasi tautan berbagi. Buka game melalui HTTPS atau localhost."
   }
 }

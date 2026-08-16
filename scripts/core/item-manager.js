@@ -2,6 +2,16 @@
 import { GameConfig, ItemType } from './config.js';
 import { rng } from './random.js';
 
+/**
+ * @typedef {Object} ItemDefinition
+ * @property {number} score
+ * @property {number} length
+ * @property {number} weight
+ * @property {string} color
+ * @property {number} [speedBoost]
+ * @property {boolean} [isPoison]
+ */
+
 const DEAD_END_DIRS = [
   { x: 0, y: -1 },
   { x: 0, y: 1 },
@@ -10,11 +20,22 @@ const DEAD_END_DIRS = [
 ];
 
 export class ItemManager {
-  constructor(grid, snake, settings) {
+  /**
+   * @param {import('./grid.js').Grid} grid
+   * @param {import('./snake.js').Snake} snake
+   * @param {Object} settings
+   * @param {Readonly<Record<string, Readonly<ItemDefinition>>>} [itemDefinitions]
+   * @param {import('./daily-v1-algorithm.js').DailyV1ItemAlgorithm | null} [algorithm]
+   */
+  constructor(grid, snake, settings, itemDefinitions = GameConfig.items, algorithm = null) {
     this.grid = grid;
     this.snake = snake;
     this.settings = settings;
+    this.itemDefinitions = itemDefinitions;
+    this.algorithm = algorithm;
     this.items = [];
+    // Active-play milliseconds. This advances only when a gameplay simulation
+    // tick runs, so pauses and background-tab suspension cannot expire hazards.
     this.dangerTimer = 0;
     this.foodEatenCount = 0;
     this.nextDangerThreshold = this.settings.dangerSpawnRate;
@@ -24,7 +45,16 @@ export class ItemManager {
     this._spawnQueue = null;
   }
 
-  tick(deltaTime, currentTime) {
+  /**
+   * @param {number} deltaTime Active gameplay time in seconds.
+   * @param {number} [wallClockTime] Retained for call-site compatibility; hazard expiry ignores it.
+   */
+  tick(deltaTime, wallClockTime = 0) {
+    void wallClockTime;
+    const elapsedMs =
+      Number.isFinite(deltaTime) && deltaTime > 0 ? Math.max(0, deltaTime * 1000) : 0;
+    this.dangerTimer += elapsedMs;
+    const currentTime = this.dangerTimer;
     const timeoutMs =
       this.settings.dangerTimeoutSec > 0 ? this.settings.dangerTimeoutSec * 1000 : 0;
 
@@ -78,7 +108,7 @@ export class ItemManager {
     }
   }
 
-  spawnItem(type, currentTime = performance.now()) {
+  spawnItem(type, currentTime = this.dangerTimer) {
     const avoidDeadEnds = this._isFood(type);
     const pos = this._findSpawnPosition(avoidDeadEnds);
 
@@ -100,6 +130,8 @@ export class ItemManager {
   }
 
   _findSpawnPosition(avoidDeadEnds) {
+    if (this.algorithm) return this.algorithm.findSpawnPosition(this, avoidDeadEnds);
+
     const isOccupied = (x, y) =>
       this.snake.isOccupied(x, y, false) || this.items.some((i) => i.x === x && i.y === y);
 
@@ -249,11 +281,13 @@ export class ItemManager {
 
   clear() {
     this.items = [];
+    this.dangerTimer = 0;
     this.foodEatenCount = 0;
     this.nextDangerThreshold = this.settings.dangerSpawnRate;
   }
 
   _pickFoodType() {
+    if (this.algorithm) return this.algorithm.pickFoodType(this);
     const foods = [
       ItemType.ROACH,
       ItemType.ANT,
@@ -265,11 +299,13 @@ export class ItemManager {
   }
 
   _pickDangerType() {
+    if (this.algorithm) return this.algorithm.pickDangerType(this);
     const dangers = [ItemType.TRASH, ItemType.POISON].filter((type) => this._isEnabled(type));
     return this._weightedPick(dangers);
   }
 
   _weightedPick(types) {
+    if (this.algorithm) return this.algorithm.weightedPick(this, types);
     if (!types?.length) return null;
 
     const totalWeight = types.reduce((sum, t) => sum + this._getWeight(t), 0);
@@ -288,7 +324,7 @@ export class ItemManager {
     if (this.settings.itemWeights && this.settings.itemWeights[type] !== undefined) {
       return this.settings.itemWeights[type];
     }
-    return GameConfig.items[type].weight;
+    return this.itemDefinitions[type]?.weight ?? 0;
   }
 
   _isEnabled(type) {
@@ -302,12 +338,12 @@ export class ItemManager {
   }
 
   _isFood(type) {
-    const item = GameConfig.items[type];
+    const item = this.itemDefinitions[type];
     return Boolean(item && item.score > 0);
   }
 
   _isDanger(type) {
-    const item = GameConfig.items[type];
+    const item = this.itemDefinitions[type];
     return Boolean(item && (item.score < 0 || item.isPoison));
   }
 }

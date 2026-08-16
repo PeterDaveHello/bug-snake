@@ -192,5 +192,23 @@
   "tutorial": {
     "title": "Tutorial",
     "rules": "Resumo das regras"
+  },
+  "daily": {
+    "title": "Caça diária a insetos",
+    "start": "Iniciar desafio diário",
+    "best": "Melhor de hoje: {score}",
+    "completedRuns": "Partidas concluídas: {count}",
+    "friendScore": "Pontuação do amigo: {score}",
+    "invalidShare": "O link de desafio compartilhado é inválido ou foi alterado.",
+    "resultTitle": "Desafio diário concluído",
+    "newBest": "Novo recorde diário!",
+    "disclaimer": "Pontuações compartilhadas não são verificadas pelo servidor.",
+    "share": "Compartilhar resultado",
+    "exit": "Voltar ao título",
+    "shareCopied": "Link do desafio copiado.",
+    "shareFallback": "Copie este link do desafio:",
+    "rulesLocked": "As regras do desafio diário estão bloqueadas.",
+    "rules": "{map} · {speed} · Veneno: {poison}",
+    "shareUnavailable": "Este ambiente não pode criar nem verificar links compartilhados. Abra o jogo via HTTPS ou localhost."
   }
 }
