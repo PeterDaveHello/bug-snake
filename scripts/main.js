@@ -2,7 +2,7 @@
 import { audio } from './audio/audio-engine.js';
 import { game } from './core/game.js';
 import { i18n } from './i18n/i18n.js';
-import { isEditableElement, setElementText } from './utils/dom.js';
+import { isEditableElement, setAnchorUrlWithoutSearch, setElementText } from './utils/dom.js';
 import { splitKeyboardShortcut, tokenizeKeyboardHints } from './utils/keyboard-hint.js';
 import { isPlainLetterShortcut } from './utils/keyboard-shortcut.js';
 
@@ -691,9 +691,7 @@ class GameApp {
 
     const playUrlEl = document.getElementById('about-play-url');
     if (playUrlEl instanceof HTMLAnchorElement) {
-      const href = window.location.href;
-      playUrlEl.href = href;
-      playUrlEl.textContent = href;
+      setAnchorUrlWithoutSearch(playUrlEl, window.location.href);
     }
 
     const repoRow = document.getElementById('about-repo-row');
