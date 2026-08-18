@@ -192,5 +192,23 @@
   "tutorial": {
     "title": "教學說明",
     "rules": "規則摘要"
+  },
+  "daily": {
+    "title": "每日除蟲挑戰",
+    "start": "開始每日挑戰",
+    "best": "今日最佳：{score}",
+    "completedRuns": "完成局數：{count}",
+    "friendScore": "好友分數：{score}",
+    "invalidShare": "分享的挑戰網址無效或已被修改。",
+    "resultTitle": "每日挑戰完成",
+    "newBest": "刷新今日最佳！",
+    "disclaimer": "分享分數未經伺服器驗證。",
+    "share": "分享結果",
+    "exit": "回到標題畫面",
+    "shareCopied": "挑戰網址已複製。",
+    "shareFallback": "請複製這個挑戰網址：",
+    "rulesLocked": "每日挑戰規則已鎖定。",
+    "rules": "{map} · {speed} · 毒藥：{poison}",
+    "shareUnavailable": "目前環境無法建立或驗證分享連結。請使用 HTTPS 或 localhost 開啟遊戲。"
   }
 }

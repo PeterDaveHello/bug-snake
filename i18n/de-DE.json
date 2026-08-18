@@ -192,5 +192,23 @@
   "tutorial": {
     "title": "Tutorial",
     "rules": "Regelübersicht"
+  },
+  "daily": {
+    "title": "Tägliche Käferjagd",
+    "start": "Tägliche Herausforderung starten",
+    "best": "Tagesbestwert: {score}",
+    "completedRuns": "Abgeschlossene Runden: {count}",
+    "friendScore": "Punktzahl des Freundes: {score}",
+    "invalidShare": "Der geteilte Herausforderungslink ist ungültig oder wurde verändert.",
+    "resultTitle": "Tägliche Herausforderung abgeschlossen",
+    "newBest": "Neuer Tagesbestwert!",
+    "disclaimer": "Geteilte Punktzahlen sind nicht serverseitig verifiziert.",
+    "share": "Ergebnis teilen",
+    "exit": "Zurück zum Titel",
+    "shareCopied": "Herausforderungslink kopiert.",
+    "shareFallback": "Diesen Herausforderungslink kopieren:",
+    "rulesLocked": "Die Regeln der täglichen Herausforderung sind gesperrt.",
+    "rules": "{map} · {speed} · Gift: {poison}",
+    "shareUnavailable": "In dieser Umgebung können Freigabelinks nicht erstellt oder geprüft werden. Öffne das Spiel über HTTPS oder localhost."
   }
 }

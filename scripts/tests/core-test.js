@@ -115,7 +115,7 @@ export function runCoreTests() {
   assert(speed === expected, `Speed scaling: Expected ${expected}, got ${speed}`);
 
   // Speed boost application
-  const boostNow = performance.now();
+  const boostNow = 1_000;
   const boostSettings = {
     speedMode: SpeedMode.FIXED,
     manualSpeed: GameConfig.rules.defaultSpeed,
@@ -129,11 +129,14 @@ export function runCoreTests() {
     boostedSpeed === GameConfig.rules.defaultSpeed + GameConfig.rules.boostSpeedDelta,
     'Speed boost increases target speed'
   );
-  boostMgr.speedBoostUntil = boostNow - 1;
-  const unboostedSpeed = boostMgr.calculateSpeed(boostNow + 100, 0);
+  let unboostedSpeed = boostedSpeed;
+  for (let elapsedMs = 250; elapsedMs <= 3000; elapsedMs += 250) {
+    boostMgr.advanceActiveTime(0.25);
+    unboostedSpeed = boostMgr.calculateSpeed(boostNow + elapsedMs, 0);
+  }
   assert(
     unboostedSpeed === GameConfig.rules.defaultSpeed,
-    'Speed boost expires and returns to base speed'
+    'Speed boost expires after its active gameplay duration'
   );
 
   // 3. Settings Reference Sync Test
@@ -1130,6 +1133,35 @@ export function runCoreTests() {
   assert(
     swContents.includes('./scripts/utils/keyboard-shortcut.js'),
     'Caches keyboard shortcut utility module'
+  );
+  assert(
+    swContents.includes('./scripts/core/daily-v1-algorithm.js'),
+    'Caches the frozen daily-v1 algorithm module'
+  );
+  assert(
+    swContents.includes("const CACHE_NAME = 'bug-snake-v2';"),
+    'Bumps the cache namespace when the precached application shell changes'
+  );
+
+  const gameContents = fs.readFileSync(new URL('../core/game.js', import.meta.url), 'utf8');
+  assert(
+    gameContents.includes('const activeTickStep = this.loop.step || 1 / 15;'),
+    'Timed gameplay rules use the nominal loop step instead of adaptive frame pacing'
+  );
+  const waitingGuardIndex = gameContents.indexOf('if (this.waitingForInput && !this.ai.enabled)');
+  const particleUpdateIndex = gameContents.indexOf('this.particles.update();', waitingGuardIndex);
+  assert(
+    waitingGuardIndex >= 0 && particleUpdateIndex > waitingGuardIndex,
+    'Waiting for first input returns before particle or gameplay updates'
+  );
+  const aiShortcutStart = gameContents.indexOf("isPlainLetterShortcut(e, 'i')");
+  const pathShortcutStart = gameContents.indexOf("isPlainLetterShortcut(e, 'p')");
+  const aiShortcutBlock = gameContents.slice(aiShortcutStart, pathShortcutStart);
+  assert(
+    aiShortcutStart >= 0 &&
+      pathShortcutStart > aiShortcutStart &&
+      !aiShortcutBlock.includes('!this.waitingForInput'),
+    'Ordinary AI shortcut remains available before the first manual move'
   );
 
   console.log(`\nTests Complete: ${passed} Passed, ${failed} Failed`);

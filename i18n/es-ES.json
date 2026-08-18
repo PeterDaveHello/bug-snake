@@ -192,5 +192,23 @@
   "tutorial": {
     "title": "Tutorial",
     "rules": "Resumen de reglas"
+  },
+  "daily": {
+    "title": "Caza diaria de bichos",
+    "start": "Iniciar desafío diario",
+    "best": "Mejor de hoy: {score}",
+    "completedRuns": "Partidas completadas: {count}",
+    "friendScore": "Puntuación del amigo: {score}",
+    "invalidShare": "El enlace del desafío compartido no es válido o fue modificado.",
+    "resultTitle": "Desafío diario completado",
+    "newBest": "¡Nuevo mejor resultado diario!",
+    "disclaimer": "Las puntuaciones compartidas no están verificadas por el servidor.",
+    "share": "Compartir resultado",
+    "exit": "Volver al título",
+    "shareCopied": "Enlace del desafío copiado.",
+    "shareFallback": "Copia este enlace del desafío:",
+    "rulesLocked": "Las reglas del desafío diario están bloqueadas.",
+    "rules": "{map} · {speed} · Veneno: {poison}",
+    "shareUnavailable": "Este entorno no puede crear ni verificar enlaces compartidos. Abre el juego mediante HTTPS o localhost."
   }
 }

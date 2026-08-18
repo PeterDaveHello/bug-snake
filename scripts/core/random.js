@@ -1,9 +1,11 @@
 // @ts-check
 export class SeededRandom {
+  /** @param {number | string} [seed] */
   constructor(seed = Date.now()) {
     this.setSeed(seed);
   }
 
+  /** @param {number | string} seed */
   setSeed(seed) {
     if (typeof seed === 'string') {
       this.initialSeed = this._hashString(seed);
@@ -55,4 +57,11 @@ export class SeededRandom {
   }
 }
 
-export const rng = new SeededRandom();
+// Gameplay and visual randomness are deliberately independent. Rendering
+// changes (for example, emitting more particles) must never change future
+// item positions or daily challenge outcomes.
+export const gameplayRng = new SeededRandom();
+export const visualRng = new SeededRandom();
+
+// Backward-compatible alias for existing gameplay code.
+export const rng = gameplayRng;
