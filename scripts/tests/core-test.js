@@ -14,6 +14,7 @@ import { Snake } from '../core/snake.js';
 import { TimeManager } from '../core/time-manager.js';
 import { Direction, InputManager } from '../input/input-manager.js';
 import { MapGenerator, MapTemplate } from '../maps/map-generator.js';
+import { setAnchorUrlWithoutSearch } from '../utils/dom.js';
 import {
   KEYBOARD_HINT_TOKENS,
   splitKeyboardShortcut,
@@ -1143,12 +1144,17 @@ export function runCoreTests() {
     'Bumps the cache namespace when the precached application shell changes'
   );
 
-  const mainContents = fs.readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+  const aboutPlayAnchor = /** @type {HTMLAnchorElement} */ (
+    /** @type {unknown} */ ({ href: '', textContent: '' })
+  );
+  setAnchorUrlWithoutSearch(
+    aboutPlayAnchor,
+    'https://peterdavehello.github.io/bug-snake/?token=secret#scores'
+  );
   assert(
-    mainContents.includes('const playUrl = new URL(window.location.href);') &&
-      mainContents.includes("playUrl.search = '';") &&
-      mainContents.includes('const href = playUrl.href;'),
-    'About play URL excludes query parameters'
+    aboutPlayAnchor.href === 'https://peterdavehello.github.io/bug-snake/#scores' &&
+      aboutPlayAnchor.textContent === aboutPlayAnchor.href,
+    'About play URL excludes query parameters from its target and label'
   );
 
   const gameContents = fs.readFileSync(new URL('../core/game.js', import.meta.url), 'utf8');

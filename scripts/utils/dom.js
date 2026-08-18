@@ -19,6 +19,18 @@ export function isEditableElement(el) {
   return false;
 }
 
+/**
+ * Sets an anchor URL and label after removing its query string.
+ * @param {HTMLAnchorElement} anchor
+ * @param {string} href
+ */
+export function setAnchorUrlWithoutSearch(anchor, href) {
+  const url = new URL(href);
+  url.search = '';
+  anchor.href = url.href;
+  anchor.textContent = url.href;
+}
+
 /** @type {Map<string, HTMLElement | null>} */
 const _elCache = new Map();
 
