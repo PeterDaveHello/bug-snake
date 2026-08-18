@@ -691,7 +691,9 @@ class GameApp {
 
     const playUrlEl = document.getElementById('about-play-url');
     if (playUrlEl instanceof HTMLAnchorElement) {
-      const href = window.location.href;
+      const playUrl = new URL(window.location.href);
+      playUrl.search = '';
+      const href = playUrl.href;
       playUrlEl.href = href;
       playUrlEl.textContent = href;
     }

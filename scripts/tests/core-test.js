@@ -1143,6 +1143,14 @@ export function runCoreTests() {
     'Bumps the cache namespace when the precached application shell changes'
   );
 
+  const mainContents = fs.readFileSync(new URL('../main.js', import.meta.url), 'utf8');
+  assert(
+    mainContents.includes('const playUrl = new URL(window.location.href);') &&
+      mainContents.includes("playUrl.search = '';") &&
+      mainContents.includes('const href = playUrl.href;'),
+    'About play URL excludes query parameters'
+  );
+
   const gameContents = fs.readFileSync(new URL('../core/game.js', import.meta.url), 'utf8');
   assert(
     gameContents.includes('const activeTickStep = this.loop.step || 1 / 15;'),
