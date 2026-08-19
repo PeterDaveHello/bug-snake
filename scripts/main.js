@@ -2,6 +2,7 @@
 import { audio } from './audio/audio-engine.js';
 import { game } from './core/game.js';
 import { i18n } from './i18n/i18n.js';
+import { DeathReviewController } from './ui/death-review-controller.js';
 import { isEditableElement, setAnchorUrlWithoutSearch, setElementText } from './utils/dom.js';
 import { splitKeyboardShortcut, tokenizeKeyboardHints } from './utils/keyboard-hint.js';
 import { isPlainLetterShortcut } from './utils/keyboard-shortcut.js';
@@ -12,6 +13,7 @@ class GameApp {
   constructor() {
     this.initialized = false;
     this.panelManager = null;
+    this.deathReviewController = null;
     this._gameState = null;
     this._GameState = null;
     this._panelAutoPaused = false;
@@ -46,6 +48,7 @@ class GameApp {
       'pause-screen',
       'level-clear-screen',
       'about-screen',
+      'death-review-screen',
       'error-screen'
     ];
     const anyActive = overlayIds.some((id) =>
@@ -257,6 +260,12 @@ class GameApp {
     });
 
     game.init('game-canvas');
+    this.deathReviewController = new DeathReviewController({
+      showScreen: (id) => this._showScreen(id),
+      hideScreen: (id) => this._hideScreen(id),
+      restart: (randomize) => this._restartWithDefault({ randomize })
+    });
+    this.deathReviewController.init();
     game.renderer.renderLegendIcons();
     window.addEventListener('resize', () => game.renderer.renderLegendIcons());
 
@@ -281,6 +290,7 @@ class GameApp {
     this._bindButton('btn-start-game', () => {
       this._hideScreen('title-screen');
       const shouldRandomize = Boolean(game.settings.randomRestart);
+      this.deathReviewController?.setReview(null);
       game.start({ randomize: shouldRandomize });
       if (shouldRandomize && this.panelManager) {
         this.panelManager.refresh();
@@ -339,7 +349,7 @@ class GameApp {
 
     this._bindButton('btn-restart-over', () => {
       this._hideScreen('game-over-screen');
-      game.restartCurrent({ randomize: false });
+      this._restartWithDefault({ randomize: false });
     });
 
     this._bindButton('btn-restart-random-over', () => {
@@ -349,7 +359,7 @@ class GameApp {
 
     this._bindButton('btn-restart-time', () => {
       this._hideScreen('time-up-screen');
-      game.restartCurrent({ randomize: false });
+      this._restartWithDefault({ randomize: false });
     });
 
     this._bindButton('btn-restart-random-time', () => {
@@ -390,6 +400,7 @@ class GameApp {
             );
             setElementText('game-over-reason', this._getDeathReasonText());
             this._updateDeathDetail();
+            this.deathReviewController?.setReview(game.getDeathReview());
             break;
 
           case GameState.TIME_UP:
@@ -540,6 +551,7 @@ class GameApp {
     }
 
     this._updateAboutInfo();
+    this.deathReviewController?.updateUIText();
     game._updateHUD();
   }
 
@@ -583,6 +595,7 @@ class GameApp {
       typeof options.randomize === 'boolean'
         ? options.randomize
         : Boolean(game.settings.randomRestart);
+    this.deathReviewController?.setReview(null);
     game.restartCurrent({ randomize: shouldRandomize });
     if (shouldRandomize && this.panelManager) {
       this.panelManager.refresh();
@@ -605,13 +618,15 @@ class GameApp {
   }
 
   _closeOverlayScreens() {
+    this.deathReviewController?.dismiss();
     const ids = [
       'title-screen',
       'game-over-screen',
       'time-up-screen',
       'pause-screen',
       'level-clear-screen',
-      'about-screen'
+      'about-screen',
+      'death-review-screen'
     ];
     ids.forEach((id) => this._hideScreen(id));
   }
@@ -840,6 +855,7 @@ class GameApp {
 const app = new GameApp();
 
 export function returnToTitleScreen() {
+  app.deathReviewController?.setReview(null);
   app._closeOverlayScreens();
   audio.duck(false);
   app._showScreen('title-screen');

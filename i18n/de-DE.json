@@ -210,5 +210,31 @@
     "rulesLocked": "Die Regeln der täglichen Herausforderung sind gesperrt.",
     "rules": "{map} · {speed} · Gift: {poison}",
     "shareUnavailable": "In dieser Umgebung können Freigabelinks nicht erstellt oder geprüft werden. Öffne das Spiel über HTTPS oder localhost."
+  },
+  "review": {
+    "title": "Fehleranalyse",
+    "open": "Fehler ansehen",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "replay": "Erneut abspielen",
+    "previousFrame": "Vorheriger Schritt",
+    "nextFrame": "Nächster Schritt",
+    "backToResult": "Zurück zum Ergebnis",
+    "restartCurrent": "Runde neu starten",
+    "restartRandom": "Zufällig neu starten",
+    "timeline": "Wiedergabe-Zeitleiste",
+    "timeBeforeCollision": "{seconds} s vor der Kollision",
+    "lastDirection": "Letzte Richtung: {direction}.",
+    "safeDirections": "Die nächste Kollision wäre sofort vermeidbar gewesen: {directions}.",
+    "noSafeDirection": "Keine Richtung hätte die Kollision sofort vermieden.",
+    "collisionMarker": "Kollisionspunkt",
+    "safeMarker": "Sofort sichere Richtungen",
+    "unavailable": "Für diese Runde ist keine Fehleranalyse verfügbar.",
+    "direction": {
+      "up": "Oben",
+      "down": "Unten",
+      "left": "Links",
+      "right": "Rechts"
+    }
   }
 }

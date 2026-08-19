@@ -210,5 +210,31 @@
     "rulesLocked": "Le regole della sfida giornaliera sono bloccate.",
     "rules": "{map} · {speed} · Veleno: {poison}",
     "shareUnavailable": "Questo ambiente non può creare o verificare link condivisi. Apri il gioco tramite HTTPS o localhost."
+  },
+  "review": {
+    "title": "Analisi dell’errore",
+    "open": "Rivedi l’errore",
+    "play": "Riproduci",
+    "pause": "Pausa",
+    "replay": "Ripeti",
+    "previousFrame": "Passo precedente",
+    "nextFrame": "Passo successivo",
+    "backToResult": "Torna al risultato",
+    "restartCurrent": "Riavvia partita",
+    "restartRandom": "Casuale e riavvia",
+    "timeline": "Cronologia del replay",
+    "timeBeforeCollision": "{seconds} s prima della collisione",
+    "lastDirection": "Direzione finale: {direction}.",
+    "safeDirections": "La collisione successiva poteva essere evitata subito: {directions}.",
+    "noSafeDirection": "Nessuna direzione poteva evitare subito la collisione.",
+    "collisionMarker": "Punto di collisione",
+    "safeMarker": "Direzioni subito sicure",
+    "unavailable": "Nessuna analisi disponibile per questa partita.",
+    "direction": {
+      "up": "Su",
+      "down": "Giù",
+      "left": "Sinistra",
+      "right": "Destra"
+    }
   }
 }
