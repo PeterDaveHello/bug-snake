@@ -1140,7 +1140,7 @@ export function runCoreTests() {
     'Caches the frozen daily-v1 algorithm module'
   );
   assert(
-    swContents.includes("const CACHE_NAME = 'bug-snake-v2';"),
+    swContents.includes("const CACHE_NAME = 'bug-snake-v3';"),
     'Bumps the cache namespace when the precached application shell changes'
   );
 

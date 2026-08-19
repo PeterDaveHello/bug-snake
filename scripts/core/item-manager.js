@@ -12,6 +12,17 @@ import { rng } from './random.js';
  * @property {boolean} [isPoison]
  */
 
+/**
+ * @typedef {Object} ItemInstance
+ * @property {number} x
+ * @property {number} y
+ * @property {string} type
+ * @property {number} [spawnTime]
+ * @property {number} [id]
+ * @property {{sizeVar?: number, hueVar?: number, angleVar?: number, quirk?: number}} [visualAttrs]
+ */
+
+const MAX_ACTIVE_TIME_MS = Number.MAX_SAFE_INTEGER;
 const DEAD_END_DIRS = [
   { x: 0, y: -1 },
   { x: 0, y: 1 },
@@ -33,6 +44,7 @@ export class ItemManager {
     this.settings = settings;
     this.itemDefinitions = itemDefinitions;
     this.algorithm = algorithm;
+    /** @type {ItemInstance[]} */
     this.items = [];
     // Active-play milliseconds. This advances only when a gameplay simulation
     // tick runs, so pauses and background-tab suspension cannot expire hazards.
@@ -51,12 +63,9 @@ export class ItemManager {
    */
   tick(deltaTime, wallClockTime = 0) {
     void wallClockTime;
-    const elapsedMs =
-      Number.isFinite(deltaTime) && deltaTime > 0 ? Math.max(0, deltaTime * 1000) : 0;
-    this.dangerTimer += elapsedMs;
+    const elapsedMs = normalizeElapsedMs(deltaTime);
+    this.dangerTimer = Math.min(MAX_ACTIVE_TIME_MS, this.dangerTimer + elapsedMs);
     const currentTime = this.dangerTimer;
-    const timeoutMs =
-      this.settings.dangerTimeoutSec > 0 ? this.settings.dangerTimeoutSec * 1000 : 0;
 
     // Filter items: remove disabled types and expired danger items
     // Optimized: Use in-place filtering to avoid creating new Array every frame
@@ -64,10 +73,7 @@ export class ItemManager {
     for (let i = 0; i < this.items.length; i++) {
       const item = this.items[i];
       if (!this._isEnabled(item.type)) continue;
-
-      const isExpiredDanger =
-        timeoutMs > 0 && this._isDanger(item.type) && currentTime - item.spawnTime > timeoutMs;
-      if (isExpiredDanger) continue;
+      if (this._isExpiredDangerAt(item, currentTime)) continue;
 
       if (writeIndex !== i) {
         this.items[writeIndex] = item;
@@ -265,6 +271,50 @@ export class ItemManager {
     return openCount <= 1;
   }
 
+  /**
+   * @param {number} x
+   * @param {number} y
+   * @returns {ItemInstance | null}
+   */
+  getItemAt(x, y) {
+    return (
+      this.items.find((item) => item.x === x && item.y === y && this._isEnabled(item.type)) ||
+      null
+    );
+  }
+
+  /**
+   * Match the lifecycle ordering used by tick(): danger expiry is evaluated
+   * after the upcoming active-play interval and before item collision.
+   * @param {{type: string, spawnTime?: number}} item
+   * @param {number} deltaTime Active gameplay time in seconds.
+   * @returns {boolean}
+   */
+  willItemExpireAfter(item, deltaTime) {
+    const projectedTime = Math.min(
+      MAX_ACTIVE_TIME_MS,
+      this.dangerTimer + normalizeElapsedMs(deltaTime)
+    );
+    return this._isExpiredDangerAt(item, projectedTime);
+  }
+
+  /**
+   * @param {{type: string, spawnTime?: number}} item
+   * @param {number} activeTimeMs
+   * @returns {boolean}
+   */
+  _isExpiredDangerAt(item, activeTimeMs) {
+    const timeoutMs =
+      this.settings.dangerTimeoutSec > 0 ? this.settings.dangerTimeoutSec * 1000 : 0;
+    const spawnTime = Number(item.spawnTime);
+    return (
+      timeoutMs > 0 &&
+      Number.isFinite(spawnTime) &&
+      this._isDanger(item.type) &&
+      activeTimeMs - spawnTime > timeoutMs
+    );
+  }
+
   checkCollision(headX, headY) {
     const index = this.items.findIndex((i) => i.x === headX && i.y === headY);
     if (index !== -1) {
@@ -346,4 +396,13 @@ export class ItemManager {
     const item = this.itemDefinitions[type];
     return Boolean(item && (item.score < 0 || item.isPoison));
   }
+}
+
+/**
+ * @param {number} deltaTime Active gameplay time in seconds.
+ * @returns {number}
+ */
+function normalizeElapsedMs(deltaTime) {
+  if (!Number.isFinite(deltaTime) || deltaTime <= 0) return 0;
+  return Math.min(deltaTime * 1000, MAX_ACTIVE_TIME_MS);
 }

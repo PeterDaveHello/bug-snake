@@ -210,5 +210,31 @@
     "rulesLocked": "قواعد التحدي اليومي مقفلة.",
     "rules": "{map} · {speed} · السم: {poison}",
     "shareUnavailable": "لا يمكن لهذه البيئة إنشاء روابط المشاركة أو التحقق منها. افتح اللعبة عبر HTTPS أو localhost."
+  },
+  "review": {
+    "title": "مراجعة الخطأ",
+    "open": "مراجعة الخطأ",
+    "play": "تشغيل",
+    "pause": "إيقاف مؤقت",
+    "replay": "إعادة التشغيل",
+    "previousFrame": "الخطوة السابقة",
+    "nextFrame": "الخطوة التالية",
+    "backToResult": "العودة إلى النتيجة",
+    "restartCurrent": "إعادة الجولة",
+    "restartRandom": "إعدادات عشوائية وإعادة الجولة",
+    "timeline": "الخط الزمني للإعادة",
+    "timeBeforeCollision": "قبل الاصطدام بـ {seconds} ث.",
+    "lastDirection": "الاتجاه الأخير: {direction}.",
+    "safeDirections": "اتجاهات تتجنب الاصطدام التالي فورًا: {directions}.",
+    "noSafeDirection": "لم يكن هناك اتجاه يتجنب الاصطدام فورًا.",
+    "collisionMarker": "موضع الاصطدام",
+    "safeMarker": "اتجاهات آمنة فورًا",
+    "unavailable": "لا تتوفر مراجعة لهذه الجولة.",
+    "direction": {
+      "up": "أعلى",
+      "down": "أسفل",
+      "left": "يسار",
+      "right": "يمين"
+    }
   }
 }

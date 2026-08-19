@@ -210,5 +210,31 @@
     "rulesLocked": "قوانین چالش روزانه قفل هستند.",
     "rules": "{map} · {speed} · سم: {poison}",
     "shareUnavailable": "این محیط نمی‌تواند پیوندهای اشتراک‌گذاری را ایجاد یا تأیید کند. بازی را از طریق HTTPS یا localhost باز کنید."
+  },
+  "review": {
+    "title": "بازبینی اشتباه",
+    "open": "بازبینی اشتباه",
+    "play": "پخش",
+    "pause": "مکث",
+    "replay": "پخش دوباره",
+    "previousFrame": "گام قبلی",
+    "nextFrame": "گام بعدی",
+    "backToResult": "بازگشت به نتیجه",
+    "restartCurrent": "شروع دوباره دور",
+    "restartRandom": "تصادفی‌سازی و شروع دوباره",
+    "timeline": "خط زمانی بازپخش",
+    "timeBeforeCollision": "{seconds} ثانیه مانده به برخورد",
+    "lastDirection": "جهت نهایی: {direction}.",
+    "safeDirections": "جهت‌های جلوگیری فوری از برخورد بعدی: {directions}.",
+    "noSafeDirection": "هیچ جهتی برخورد را فوراً دفع نمی‌کرد.",
+    "collisionMarker": "محل برخورد",
+    "safeMarker": "جهت‌های فوراً امن",
+    "unavailable": "برای این دور بازبینی اشتباه موجود نیست.",
+    "direction": {
+      "up": "بالا",
+      "down": "پایین",
+      "left": "چپ",
+      "right": "راست"
+    }
   }
 }

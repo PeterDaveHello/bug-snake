@@ -2,19 +2,21 @@
 /** @type {ServiceWorkerGlobalScope} */
 const serviceWorker = /** @type {ServiceWorkerGlobalScope} */ (/** @type {unknown} */ (self));
 const CACHE_PREFIX = 'bug-snake-v';
-const CACHE_VERSION = 2;
-const CACHE_NAME = 'bug-snake-v2';
+const CACHE_VERSION = 3;
+const CACHE_NAME = 'bug-snake-v3';
 const CORE_ASSETS = [
   './',
   './index.html',
   './favicon.ico',
   './styles/main.css',
   './styles/daily-challenge.css',
+  './styles/death-review.css',
   './scripts/main.js',
   './scripts/core/config.js',
   './scripts/core/daily-challenge.js',
   './scripts/core/daily-v1-algorithm.js',
   './scripts/core/daily-challenge-store.js',
+  './scripts/core/death-review-recorder.js',
   './scripts/core/game.js',
   './scripts/core/game-loop.js',
   './scripts/core/grid.js',
@@ -33,6 +35,7 @@ const CORE_ASSETS = [
   './scripts/ai/ai-pilot.js',
   './scripts/ui/panel-manager.js',
   './scripts/ui/daily-challenge-controller.js',
+  './scripts/ui/death-review-controller.js',
   './scripts/utils/dom.js',
   './scripts/utils/keyboard-hint.js',
   './scripts/utils/keyboard-shortcut.js',
