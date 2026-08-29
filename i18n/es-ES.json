@@ -210,5 +210,31 @@
     "rulesLocked": "Las reglas del desafío diario están bloqueadas.",
     "rules": "{map} · {speed} · Veneno: {poison}",
     "shareUnavailable": "Este entorno no puede crear ni verificar enlaces compartidos. Abre el juego mediante HTTPS o localhost."
+  },
+  "review": {
+    "title": "Revisión del error",
+    "open": "Revisar el error",
+    "play": "Reproducir",
+    "pause": "Pausar",
+    "replay": "Repetir",
+    "previousFrame": "Paso anterior",
+    "nextFrame": "Paso siguiente",
+    "backToResult": "Volver al resultado",
+    "restartCurrent": "Reiniciar partida",
+    "restartRandom": "Aleatorizar y reiniciar",
+    "timeline": "Línea de tiempo de la repetición",
+    "timeBeforeCollision": "{seconds} s antes de la colisión",
+    "lastDirection": "Dirección final: {direction}.",
+    "safeDirections": "Se podía evitar de inmediato la siguiente colisión: {directions}.",
+    "noSafeDirection": "Ninguna dirección podía evitar la colisión de inmediato.",
+    "collisionMarker": "Punto de colisión",
+    "safeMarker": "Direcciones seguras inmediatas",
+    "unavailable": "No hay una revisión disponible para esta partida.",
+    "direction": {
+      "up": "Arriba",
+      "down": "Abajo",
+      "left": "Izquierda",
+      "right": "Derecha"
+    }
   }
 }

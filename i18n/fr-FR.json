@@ -210,5 +210,31 @@
     "rulesLocked": "Les règles du défi quotidien sont verrouillées.",
     "rules": "{map} · {speed} · Poison : {poison}",
     "shareUnavailable": "Cet environnement ne peut pas créer ni vérifier les liens de partage. Ouvrez le jeu via HTTPS ou localhost."
+  },
+  "review": {
+    "title": "Analyse de l’erreur",
+    "open": "Revoir l’erreur",
+    "play": "Lire",
+    "pause": "Pause",
+    "replay": "Rejouer",
+    "previousFrame": "Étape précédente",
+    "nextFrame": "Étape suivante",
+    "backToResult": "Retour au résultat",
+    "restartCurrent": "Recommencer la partie",
+    "restartRandom": "Aléatoire et recommencer",
+    "timeline": "Chronologie du ralenti",
+    "timeBeforeCollision": "{seconds} s avant la collision",
+    "lastDirection": "Dernière direction : {direction}.",
+    "safeDirections": "La prochaine collision pouvait être évitée immédiatement : {directions}.",
+    "noSafeDirection": "Aucune direction ne pouvait éviter immédiatement la collision.",
+    "collisionMarker": "Point de collision",
+    "safeMarker": "Directions immédiatement sûres",
+    "unavailable": "Aucune analyse n’est disponible pour cette partie.",
+    "direction": {
+      "up": "Haut",
+      "down": "Bas",
+      "left": "Gauche",
+      "right": "Droite"
+    }
   }
 }

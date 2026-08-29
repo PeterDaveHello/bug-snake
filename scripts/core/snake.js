@@ -11,6 +11,7 @@ export class Snake {
     this.growthPending = 0;
     this.shrinkPending = 0;
     this.isDead = false;
+    /** @type {string | null} */
     this.deathReason = null;
     /** @type {Set<number>} cell keys occupied by body segments */
     this._occupiedKeys = new Set();
@@ -63,41 +64,65 @@ export class Snake {
     this.nextDirection = newDir;
   }
 
+  /**
+   * Inspect one prospective move without mutating the snake.
+   * @param {{x: number, y: number}} newDir
+   * @returns {{
+   *   allowed: boolean,
+   *   reason: 'reverse' | 'wall' | 'obstacle' | 'self' | null,
+   *   target: {x: number, y: number} | null,
+   *   normalizedTarget: {x: number, y: number} | null
+   * }}
+   */
+  inspectMove(newDir) {
+    if (!newDir) {
+      return { allowed: false, reason: 'reverse', target: null, normalizedTarget: null };
+    }
+    if (this.direction.x + newDir.x === 0 && this.direction.y + newDir.y === 0) {
+      return { allowed: false, reason: 'reverse', target: null, normalizedTarget: null };
+    }
+
+    const head = this.body[0];
+    if (!head) {
+      return { allowed: false, reason: 'self', target: null, normalizedTarget: null };
+    }
+
+    const target = { x: head.x + newDir.x, y: head.y + newDir.y };
+    if (!this.grid.isValid(target.x, target.y)) {
+      return { allowed: false, reason: 'wall', target, normalizedTarget: null };
+    }
+
+    const normalizedTarget = this.grid.wrapWalls
+      ? this.grid.normalize(target.x, target.y)
+      : { ...target };
+    if (this.grid.isObstacle(normalizedTarget.x, normalizedTarget.y)) {
+      return { allowed: false, reason: 'obstacle', target, normalizedTarget };
+    }
+
+    const ignoreCount = this.growthPending === 0 ? 1 + (this.shrinkPending > 0 ? 1 : 0) : 0;
+    if (this.isOccupied(normalizedTarget.x, normalizedTarget.y, ignoreCount)) {
+      return { allowed: false, reason: 'self', target, normalizedTarget };
+    }
+
+    return { allowed: true, reason: null, target, normalizedTarget };
+  }
+
   tick() {
     if (this.isDead) return;
 
     this._capturePrevBody();
 
-    this.direction = this.nextDirection;
-    const head = this.body[0];
-    let nextX = head.x + this.direction.x;
-    let nextY = head.y + this.direction.y;
-
-    if (!this.grid.isValid(nextX, nextY)) {
-      this.deathReason = 'wall';
+    const nextDirection = this.nextDirection;
+    const move = this.inspectMove(nextDirection);
+    this.direction = nextDirection;
+    if (!move.allowed || !move.normalizedTarget) {
+      this.deathReason = move.reason === 'reverse' ? 'self' : move.reason;
       this.isDead = true;
       return;
     }
 
-    if (this.grid.wrapWalls) {
-      const nextPos = this.grid.normalize(nextX, nextY);
-      nextX = nextPos.x;
-      nextY = nextPos.y;
-    }
-
-    if (this.grid.isObstacle(nextX, nextY)) {
-      this.deathReason = 'obstacle';
-      this.isDead = true;
-      return;
-    }
-
-    const ignoreCount = this.growthPending === 0 ? 1 + (this.shrinkPending > 0 ? 1 : 0) : 0;
-    if (this.isOccupied(nextX, nextY, ignoreCount)) {
-      this.deathReason = 'self';
-      this.isDead = true;
-      return;
-    }
-
+    const nextX = move.normalizedTarget.x;
+    const nextY = move.normalizedTarget.y;
     this.body.unshift({ x: nextX, y: nextY });
     const size = this.grid.size;
     const nextKey = nextY * size + nextX;

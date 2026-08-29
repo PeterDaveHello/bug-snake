@@ -210,5 +210,31 @@
     "rulesLocked": "रोज़ाना चुनौती के नियम लॉक हैं।",
     "rules": "{map} · {speed} · ज़हर: {poison}",
     "shareUnavailable": "यह वातावरण शेयर लिंक बना या सत्यापित नहीं कर सकता। गेम को HTTPS या localhost पर खोलें।"
+  },
+  "review": {
+    "title": "गलती की समीक्षा",
+    "open": "गलती देखें",
+    "play": "चलाएँ",
+    "pause": "रोकें",
+    "replay": "फिर चलाएँ",
+    "previousFrame": "पिछला चरण",
+    "nextFrame": "अगला चरण",
+    "backToResult": "परिणाम पर लौटें",
+    "restartCurrent": "रन फिर शुरू करें",
+    "restartRandom": "यादृच्छिक करके फिर शुरू करें",
+    "timeline": "रीप्ले समयरेखा",
+    "timeBeforeCollision": "टक्कर से {seconds} सेकंड पहले",
+    "lastDirection": "अंतिम दिशा: {direction}।",
+    "safeDirections": "अगली टक्कर तुरंत इन दिशाओं से टल सकती थी: {directions}।",
+    "noSafeDirection": "कोई दिशा टक्कर को तुरंत नहीं टाल सकती थी।",
+    "collisionMarker": "टक्कर का स्थान",
+    "safeMarker": "तुरंत सुरक्षित दिशाएँ",
+    "unavailable": "इस रन के लिए गलती की समीक्षा उपलब्ध नहीं है।",
+    "direction": {
+      "up": "ऊपर",
+      "down": "नीचे",
+      "left": "बाएँ",
+      "right": "दाएँ"
+    }
   }
 }

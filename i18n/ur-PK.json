@@ -210,5 +210,31 @@
     "rulesLocked": "روزانہ چیلنج کے قواعد لاک ہیں۔",
     "rules": "{map} · {speed} · زہر: {poison}",
     "shareUnavailable": "یہ ماحول شیئر لنکس بنا یا تصدیق نہیں کر سکتا۔ گیم کو HTTPS یا localhost کے ذریعے کھولیں۔"
+  },
+  "review": {
+    "title": "غلطی کا جائزہ",
+    "open": "غلطی دیکھیں",
+    "play": "چلائیں",
+    "pause": "روکیں",
+    "replay": "دوبارہ چلائیں",
+    "previousFrame": "پچھلا مرحلہ",
+    "nextFrame": "اگلا مرحلہ",
+    "backToResult": "نتیجے پر واپس جائیں",
+    "restartCurrent": "کھیل دوبارہ شروع کریں",
+    "restartRandom": "بے ترتیب کر کے دوبارہ شروع کریں",
+    "timeline": "ری پلے ٹائم لائن",
+    "timeBeforeCollision": "ٹکراؤ سے {seconds} سیکنڈ پہلے",
+    "lastDirection": "آخری سمت: {direction}۔",
+    "safeDirections": "اگلا ٹکراؤ فوراً ان سمتوں سے بچ سکتا تھا: {directions}۔",
+    "noSafeDirection": "کوئی سمت فوراً ٹکراؤ سے نہیں بچا سکتی تھی۔",
+    "collisionMarker": "ٹکراؤ کی جگہ",
+    "safeMarker": "فوراً محفوظ سمتیں",
+    "unavailable": "اس کھیل کے لیے غلطی کا جائزہ موجود نہیں۔",
+    "direction": {
+      "up": "اوپر",
+      "down": "نیچے",
+      "left": "بائیں",
+      "right": "دائیں"
+    }
   }
 }

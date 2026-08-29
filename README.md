@@ -28,6 +28,7 @@ accessibility, synthesized audio, and a proper game state machine.
 - 4 snake skins (Neon Coil, Quantum Ribbon, Chrome Warden, Void Pulse), each with its own breathing animation.
 - Death sequence: `DYING` → `GAME_OVER` with screen shake, snake flash, and audio ducking.
 - `+10` / `-3` text particles float up from items on pickup. Burst particles on eat and other events.
+- Death review replays the final four seconds at half speed, marks the collision, and shows directions that could avoid the next immediate collision.
 - All SFX synthesized via Web Audio API, with no audio files. Music pitch, tempo, and combo intensity react to snake length and speed.
 - Snake head pulses before first move so you know it's waiting for input.
 - Smooth CSS transitions between screens.
