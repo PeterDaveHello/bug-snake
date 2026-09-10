@@ -210,5 +210,31 @@
     "rulesLocked": "Aturan tantangan harian dikunci.",
     "rules": "{map} · {speed} · Racun: {poison}",
     "shareUnavailable": "Lingkungan ini tidak dapat membuat atau memverifikasi tautan berbagi. Buka game melalui HTTPS atau localhost."
+  },
+  "review": {
+    "title": "Tinjauan Kesalahan",
+    "open": "Tinjau Kesalahan",
+    "play": "Putar",
+    "pause": "Jeda",
+    "replay": "Putar Ulang",
+    "previousFrame": "Langkah Sebelumnya",
+    "nextFrame": "Langkah Berikutnya",
+    "backToResult": "Kembali ke Hasil",
+    "restartCurrent": "Mulai Ulang Putaran",
+    "restartRandom": "Acak & Mulai Ulang",
+    "timeline": "Linimasa putar ulang",
+    "timeBeforeCollision": "{seconds} dtk sebelum tabrakan",
+    "lastDirection": "Arah terakhir: {direction}.",
+    "safeDirections": "Tabrakan berikutnya bisa langsung dihindari ke: {directions}.",
+    "noSafeDirection": "Tidak ada arah yang dapat langsung menghindari tabrakan.",
+    "collisionMarker": "Titik tabrakan",
+    "safeMarker": "Arah yang langsung aman",
+    "unavailable": "Tinjauan kesalahan tidak tersedia untuk putaran ini.",
+    "direction": {
+      "up": "Atas",
+      "down": "Bawah",
+      "left": "Kiri",
+      "right": "Kanan"
+    }
   }
 }

@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
 
 const ORIGIN = 'https://example.test';
-const CACHE_NAME = 'bug-snake-v2';
+const CACHE_NAME = 'bug-snake-v3';
 
 class FakeResponse {
   /**
@@ -277,7 +277,7 @@ function assert(condition, message) {
     'bug-snake-v0',
     'bug-snake-v1',
     CACHE_NAME,
-    'bug-snake-v3',
+    'bug-snake-v4',
     'another-app-v1',
     'some-other-project-cache'
   ]) {
@@ -292,7 +292,7 @@ function assert(condition, message) {
   );
   assert(cacheNames.includes(CACHE_NAME), 'Activate preserves the current bug-snake cache');
   assert(
-    cacheNames.includes('bug-snake-v3'),
+    cacheNames.includes('bug-snake-v4'),
     'Activate preserves newer bug-snake caches during rollback or worker races'
   );
   assert(

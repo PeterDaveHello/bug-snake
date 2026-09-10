@@ -11,6 +11,7 @@ import { isPlainLetterShortcut } from '../utils/keyboard-shortcut.js';
 
 import { GameConfig, SpeedMode, PoisonMode, ItemType } from './config.js';
 import { createDailyV1ItemAlgorithm } from './daily-v1-algorithm.js';
+import { DeathReviewRecorder, directionToMask } from './death-review-recorder.js';
 import { GameLoop } from './game-loop.js';
 import { Grid } from './grid.js';
 import { ItemManager } from './item-manager.js';
@@ -123,6 +124,7 @@ export class Game {
     this._speedSmoothingLastAt = performance.now();
     this._lastInputGraceAppliedAt = 0;
     this._dyingTimer = 0;
+    this.deathReviewRecorder = new DeathReviewRecorder();
 
     this.loop = new GameLoop(this._update.bind(this), this._render.bind(this));
     this.loop.setSpeed(GameConfig.rules.defaultSpeed);
@@ -260,6 +262,7 @@ export class Game {
     this._speedSmoothingLastAt = performance.now();
     this._lastInputGraceAppliedAt = 0;
     this.loop.setSpeed(speed);
+    this.deathReviewRecorder.beginRun(this);
 
     this._updateHUD();
   }
@@ -402,6 +405,14 @@ export class Game {
       this.snake.setDirection(inputDir);
     }
 
+    const attemptedDirection = this.snake.nextDirection;
+    this.deathReviewRecorder.markDecision({
+      attemptedDirection,
+      safeDirectionMask: this._getSafeDirectionMask(activeTickStep),
+      inspection: this.inspectMove(attemptedDirection, activeTickStep),
+      stepDurationMs: activeTickStep * 1000
+    });
+
     this.snake.tick();
 
     if (this.snake.isDead) {
@@ -421,6 +432,10 @@ export class Game {
         this.itemManager.recordConsumption();
       }
       this._handleItemCollection(hitItemType, head, now);
+    }
+
+    if (!this.snake.isDead) {
+      this.deathReviewRecorder.captureFrame(this, activeTickStep * 1000);
     }
   }
 
@@ -566,6 +581,7 @@ export class Game {
     this.loop.setSpeed(speed);
 
     inputManager.clearQueue();
+    this.deathReviewRecorder.beginRun(this);
     this._updateHUD();
 
     gameState.transitionTo(GameState.PLAYING);
@@ -637,11 +653,16 @@ export class Game {
 
     this.scoreManager.checkHighScore();
     this.lastDeathReason = this.snake.deathReason || 'unknown';
+    this.deathReviewRecorder.finish(this.lastDeathReason);
 
     this._dyingTimer = 1.0;
     gameState.transitionTo(GameState.DYING);
     // Loop continues — renderer draws death animation
     // _update() handles DYING countdown and transitions to GAME_OVER
+  }
+
+  getDeathReview() {
+    return this.deathReviewRecorder.getReview();
   }
 
   resetHighScore(mode = this.gameMode) {
@@ -753,39 +774,59 @@ export class Game {
   }
 
   /**
+   * Inspect a prospective move for review analysis, including lethal items.
+   * The active step is projected because danger expiry is processed after the
+   * snake moves but before item collision in the actual update loop.
+   * @param {{x: number, y: number}} dir
+   * @param {number} [activeTickStep] Active gameplay time in seconds.
+   * @returns {{
+   *   allowed: boolean,
+   *   reason: string | null,
+   *   target: {x: number, y: number} | null,
+   *   normalizedTarget: {x: number, y: number} | null
+   * }}
+   */
+  inspectMove(dir, activeTickStep = 0) {
+    const inspection = this.snake.inspectMove(dir);
+    if (!inspection.allowed || !inspection.normalizedTarget) return inspection;
+
+    const item = this.itemManager.getItemAt(
+      inspection.normalizedTarget.x,
+      inspection.normalizedTarget.y
+    );
+    if (
+      item?.type === ItemType.POISON &&
+      this.settings.poisonMode === PoisonMode.DEATH &&
+      !this.itemManager.willItemExpireAfter(item, activeTickStep)
+    ) {
+      return { ...inspection, allowed: false, reason: 'poison' };
+    }
+    return inspection;
+  }
+
+  /**
+   * @param {number} [activeTickStep] Active gameplay time in seconds.
+   * @returns {number}
+   */
+  _getSafeDirectionMask(activeTickStep = 0) {
+    let mask = 0;
+    for (const direction of ALL_DIRECTIONS) {
+      if (this.inspectMove(direction, activeTickStep).allowed) {
+        mask |= directionToMask(direction);
+      }
+    }
+    return mask;
+  }
+
+  /**
+   * Turn assist intentionally checks map and body collisions with
+   * `snake.inspectMove()`. Review analysis uses `this.inspectMove()` so lethal
+   * poison is reported as unsafe without changing existing gameplay behavior.
    * @param {{x: number, y: number}} dir
    * @returns {boolean}
    */
   _isImmediateDeathDirection(dir) {
-    if (!dir) return true;
-    if (this.snake.direction.x + dir.x === 0 && this.snake.direction.y + dir.y === 0) {
-      return true;
-    }
-
-    const head = this.snake.getHead();
-    let nextX = head.x + dir.x;
-    let nextY = head.y + dir.y;
-    if (!this.grid.isValid(nextX, nextY)) {
-      return true;
-    }
-
-    if (this.grid.wrapWalls) {
-      const normalized = this.grid.normalize(nextX, nextY);
-      nextX = normalized.x;
-      nextY = normalized.y;
-    }
-
-    if (this.grid.isObstacle(nextX, nextY)) {
-      return true;
-    }
-
-    const ignoreCount =
-      this.snake.growthPending === 0 ? 1 + (this.snake.shrinkPending > 0 ? 1 : 0) : 0;
-    if (this.snake.isOccupied(nextX, nextY, ignoreCount)) {
-      return true;
-    }
-
-    return false;
+    return !this.snake.inspectMove(dir).allowed;
   }
 
   /**

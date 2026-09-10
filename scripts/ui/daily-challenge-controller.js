@@ -171,16 +171,7 @@ class DailyChallengeController {
     button.id = 'btn-daily-challenge';
     button.type = 'button';
 
-    card.append(
-      heading,
-      date,
-      metrics,
-      rulesTitle,
-      rules,
-      sharedDisclaimer,
-      warning,
-      button
-    );
+    card.append(heading, date, metrics, rulesTitle, rules, sharedDisclaimer, warning, button);
     const guide = titleScreen.querySelector('.title-guide');
     titleScreen.insertBefore(card, guide);
 
@@ -218,10 +209,7 @@ class DailyChallengeController {
     const metrics = document.createElement('div');
     metrics.className = 'daily-result-metrics';
     const best = createMetric('daily-result-best', 'daily-result-metric');
-    const completedRuns = createMetric(
-      'daily-result-completed-runs',
-      'daily-result-metric'
-    );
+    const completedRuns = createMetric('daily-result-completed-runs', 'daily-result-metric');
     metrics.append(best, completedRuns);
 
     const newBest = document.createElement('p');
@@ -396,7 +384,12 @@ class DailyChallengeController {
     this._updateUI();
 
     setTimeout(() => {
-      if (!this.active || !this.completed) return;
+      if (
+        !this.active ||
+        !this.completed ||
+        document.body.classList.contains('death-review-active')
+      )
+        return;
       if (this.elements.resultPanel instanceof HTMLElement && this.elements.resultPanel.hidden)
         return;
       if (
@@ -637,12 +630,7 @@ class DailyChallengeController {
     setText(this.elements.title, i18n.t('daily.title'));
     setText(this.elements.date, formattedDate);
     setMetricText(this.elements.best, 'daily.best', 'score', this.record.bestScore);
-    setMetricText(
-      this.elements.completedRuns,
-      'daily.completedRuns',
-      'count',
-      completedRunCount
-    );
+    setMetricText(this.elements.completedRuns, 'daily.completedRuns', 'count', completedRunCount);
     setText(this.elements.rulesTitle, i18n.t('tutorial.rules'));
     this._updateRules();
     setText(this.elements.startButton, i18n.t('daily.start'));
@@ -650,12 +638,7 @@ class DailyChallengeController {
     if (this.elements.friendScore instanceof HTMLElement) {
       this.elements.friendScore.hidden = this.sharedScore === null;
       if (this.sharedScore !== null) {
-        setMetricText(
-          this.elements.friendScore,
-          'daily.friendScore',
-          'score',
-          this.sharedScore
-        );
+        setMetricText(this.elements.friendScore, 'daily.friendScore', 'score', this.sharedScore);
       }
     }
     if (this.elements.sharedDisclaimer instanceof HTMLElement) {
@@ -674,12 +657,7 @@ class DailyChallengeController {
     }
 
     setText(this.elements.resultTitle, i18n.t('daily.resultTitle'));
-    setMetricText(
-      this.elements.resultBest,
-      'daily.best',
-      'score',
-      this.record.bestScore
-    );
+    setMetricText(this.elements.resultBest, 'daily.best', 'score', this.record.bestScore);
     setMetricText(
       this.elements.resultCompletedRuns,
       'daily.completedRuns',
@@ -712,20 +690,11 @@ class DailyChallengeController {
       maze_simple: 'mapTemplate.mazeSimple'
     }[this.challenge.mapTemplate];
     setText(this.elements.ruleMapLabel, i18n.t('panel.difficulty'));
-    setText(
-      this.elements.ruleMapValue,
-      mapKey ? i18n.t(mapKey) : this.challenge.mapTemplate
-    );
+    setText(this.elements.ruleMapValue, mapKey ? i18n.t(mapKey) : this.challenge.mapTemplate);
     setText(this.elements.ruleSpeedLabel, i18n.t('panel.speedMode'));
-    setText(
-      this.elements.ruleSpeedValue,
-      i18n.t(`speedMode.${this.challenge.speedMode}`)
-    );
+    setText(this.elements.ruleSpeedValue, i18n.t(`speedMode.${this.challenge.speedMode}`));
     setText(this.elements.rulePoisonLabel, i18n.t('panel.poisonMode'));
-    setText(
-      this.elements.rulePoisonValue,
-      i18n.t(`poisonMode.${this.challenge.poisonMode}`)
-    );
+    setText(this.elements.rulePoisonValue, i18n.t(`poisonMode.${this.challenge.poisonMode}`));
   }
 
   /** @param {string} dateKey @returns {string} */

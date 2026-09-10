@@ -210,5 +210,31 @@
     "rulesLocked": "Günlük mücadele kuralları kilitli.",
     "rules": "{map} · {speed} · Zehir: {poison}",
     "shareUnavailable": "Bu ortam paylaşım bağlantıları oluşturamaz veya doğrulayamaz. Oyunu HTTPS ya da localhost üzerinden açın."
+  },
+  "review": {
+    "title": "Hata İncelemesi",
+    "open": "Hatayı İncele",
+    "play": "Oynat",
+    "pause": "Duraklat",
+    "replay": "Yeniden Oynat",
+    "previousFrame": "Önceki Adım",
+    "nextFrame": "Sonraki Adım",
+    "backToResult": "Sonuca Dön",
+    "restartCurrent": "Turu Yeniden Başlat",
+    "restartRandom": "Rastgeleleştir ve Başlat",
+    "timeline": "Tekrar zaman çizelgesi",
+    "timeBeforeCollision": "Çarpışmadan {seconds} sn önce",
+    "lastDirection": "Son yön: {direction}.",
+    "safeDirections": "Sonraki çarpışma hemen şu yönlerle önlenebilirdi: {directions}.",
+    "noSafeDirection": "Hiçbir yön çarpışmayı hemen önleyemezdi.",
+    "collisionMarker": "Çarpışma noktası",
+    "safeMarker": "Hemen güvenli yönler",
+    "unavailable": "Bu tur için hata incelemesi yok.",
+    "direction": {
+      "up": "Yukarı",
+      "down": "Aşağı",
+      "left": "Sol",
+      "right": "Sağ"
+    }
   }
 }

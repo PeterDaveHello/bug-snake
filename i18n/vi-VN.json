@@ -210,5 +210,31 @@
     "rulesLocked": "Luật thử thách hằng ngày đã được khóa.",
     "rules": "{map} · {speed} · Độc: {poison}",
     "shareUnavailable": "Môi trường này không thể tạo hoặc xác minh liên kết chia sẻ. Hãy mở trò chơi qua HTTPS hoặc localhost."
+  },
+  "review": {
+    "title": "Xem lại sai lầm",
+    "open": "Xem lại sai lầm",
+    "play": "Phát",
+    "pause": "Tạm dừng",
+    "replay": "Phát lại",
+    "previousFrame": "Bước trước",
+    "nextFrame": "Bước sau",
+    "backToResult": "Về kết quả",
+    "restartCurrent": "Chơi lại lượt",
+    "restartRandom": "Ngẫu nhiên và chơi lại",
+    "timeline": "Dòng thời gian phát lại",
+    "timeBeforeCollision": "{seconds} giây trước va chạm",
+    "lastDirection": "Hướng cuối: {direction}.",
+    "safeDirections": "Có thể tránh ngay va chạm kế tiếp theo hướng: {directions}.",
+    "noSafeDirection": "Không có hướng nào tránh được va chạm ngay lập tức.",
+    "collisionMarker": "Điểm va chạm",
+    "safeMarker": "Hướng an toàn tức thời",
+    "unavailable": "Không có bản xem lại cho lượt này.",
+    "direction": {
+      "up": "Lên",
+      "down": "Xuống",
+      "left": "Trái",
+      "right": "Phải"
+    }
   }
 }

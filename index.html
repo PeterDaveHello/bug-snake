@@ -75,6 +75,7 @@
     <title>SerpentOS: Bug Buster Snake</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/death-review.css">
   </head>
   <body>
     <div id="game-container">
@@ -313,6 +314,8 @@
         <p id="game-over-score">Final Score: 0</p>
         <p id="game-over-reason" class="game-over-reason">Reason: Unknown</p>
         <p id="game-over-detail" class="game-over-detail">Tip:</p>
+        <p id="game-over-review-summary" class="game-over-review-summary" hidden></p>
+        <button id="btn-open-death-review" type="button" hidden>Review Mistake</button>
         <p id="game-over-prompt" class="restart-prompt" data-i18n="ui.restartPrompt">Restart?</p>
         <div class="screen-actions">
           <button id="btn-restart-over" type="button">Restart Current Run <kbd>R</kbd></button>
@@ -321,6 +324,44 @@
           </button>
           <button id="btn-close-over" type="button">Close <kbd>Esc</kbd></button>
         </div>
+      </div>
+
+      <div id="death-review-screen" class="screen screen--death-review" role="dialog" aria-modal="true" aria-labelledby="death-review-title">
+        <section class="death-review-panel">
+          <h2 id="death-review-title">Mistake Review</h2>
+          <p id="death-review-summary" class="death-review-summary" role="status" aria-live="polite"></p>
+          <p id="death-review-time" class="death-review-time">0.0s before collision</p>
+          <input
+            id="death-review-timeline"
+            class="death-review-timeline"
+            type="range"
+            min="0"
+            max="0"
+            value="0"
+            step="1"
+            aria-label="Replay timeline"
+          >
+          <div class="death-review-controls">
+            <button id="btn-death-review-previous" type="button">Previous Step</button>
+            <button id="btn-death-review-play" type="button" aria-pressed="false">Play</button>
+            <button id="btn-death-review-next" type="button">Next Step</button>
+          </div>
+          <div class="death-review-legend">
+            <span class="death-review-legend-item">
+              <span class="death-review-marker death-review-marker--collision" aria-hidden="true">×</span>
+              <span id="death-review-collision-label">Collision point</span>
+            </span>
+            <span class="death-review-legend-item">
+              <span class="death-review-marker death-review-marker--safe" aria-hidden="true">↑</span>
+              <span id="death-review-safe-label">Immediately safe directions</span>
+            </span>
+          </div>
+          <div class="death-review-actions">
+            <button id="btn-death-review-back" type="button">Back to Result</button>
+            <button id="btn-death-review-restart" type="button">Restart Run</button>
+            <button id="btn-death-review-random" type="button">Randomize &amp; Restart</button>
+          </div>
+        </section>
       </div>
 
       <div id="time-up-screen" class="screen">

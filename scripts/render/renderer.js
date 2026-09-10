@@ -260,9 +260,9 @@ export class Renderer {
     ctx.drawImage(sprite.canvas, x - sprite.padding, y - sprite.padding, drawSize, drawSize);
   }
 
-  render(game, alpha) {
+  render(game, alpha, frameTime = performance.now()) {
     this.game = game; // Store ref for resize updates
-    this._frameTime = performance.now(); // Cache timestamp for animations
+    this._frameTime = Number.isFinite(frameTime) ? frameTime : performance.now();
     this.ctx.fillStyle = this.colors.background;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
@@ -392,7 +392,7 @@ export class Renderer {
     const x = this.offsetX;
     const y = this.offsetY;
     const wrapWalls = grid.wrapWalls;
-    const timeMs = this._frameTime || performance.now();
+    const timeMs = this._frameTime;
     const pulse = wrapWalls ? this._getWrapBoundsPulse(timeMs) : 0;
     const baseLineWidth = Math.max(2, Math.floor(this.cellSize * 0.1));
 
@@ -436,7 +436,7 @@ export class Renderer {
     if (!itemManager) return;
 
     const useSpriteCache = this._isItemSpriteCacheEnabled();
-    const time = this._frameTime || performance.now();
+    const time = this._frameTime;
     const dpr = this.dpr || 1;
 
     for (const item of itemManager.items) {
@@ -499,7 +499,7 @@ export class Renderer {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    const time = fixedTime !== null ? fixedTime : this._frameTime || performance.now();
+    const time = fixedTime !== null ? fixedTime : this._frameTime;
     // Unique random seed based on item ID or position
     const seed = item.id || item.x * 100 + item.y;
 
@@ -1120,7 +1120,7 @@ export class Renderer {
       this.ctx.fill();
 
       // Tongue (flick animation)
-      const time = this._frameTime || performance.now();
+      const time = this._frameTime;
       if (Math.floor(time / 200) % 10 === 0) {
         this.ctx.strokeStyle = '#FF3333';
         this.ctx.lineWidth = Math.max(1, size * 0.05);
@@ -1194,7 +1194,7 @@ export class Renderer {
     const prevBody = Array.isArray(snake.prevBody) ? snake.prevBody : [];
     const gridSize = this.game && this.game.grid ? this.game.grid.size : GameConfig.map.defaultSize;
     const wrapWalls = this.game && this.game.grid ? this.game.grid.wrapWalls : false;
-    const time = (this._frameTime || performance.now()) * 0.005;
+    const time = this._frameTime * 0.005;
 
     for (let i = 0; i < snake.body.length; i++) {
       const s = snake.body[i];

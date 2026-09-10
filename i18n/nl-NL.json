@@ -210,5 +210,31 @@
     "rulesLocked": "De regels van de dagelijkse uitdaging zijn vergrendeld.",
     "rules": "{map} · {speed} · Gif: {poison}",
     "shareUnavailable": "In deze omgeving kunnen gedeelde links niet worden gemaakt of geverifieerd. Open het spel via HTTPS of localhost."
+  },
+  "review": {
+    "title": "Fout terugkijken",
+    "open": "Fout terugkijken",
+    "play": "Afspelen",
+    "pause": "Pauzeren",
+    "replay": "Opnieuw afspelen",
+    "previousFrame": "Vorige stap",
+    "nextFrame": "Volgende stap",
+    "backToResult": "Terug naar resultaat",
+    "restartCurrent": "Ronde herstarten",
+    "restartRandom": "Willekeurig en herstarten",
+    "timeline": "Tijdlijn van herhaling",
+    "timeBeforeCollision": "{seconds} s voor de botsing",
+    "lastDirection": "Laatste richting: {direction}.",
+    "safeDirections": "De volgende botsing was direct te vermijden via: {directions}.",
+    "noSafeDirection": "Geen richting kon de botsing direct vermijden.",
+    "collisionMarker": "Botsingspunt",
+    "safeMarker": "Direct veilige richtingen",
+    "unavailable": "Voor deze ronde is geen foutweergave beschikbaar.",
+    "direction": {
+      "up": "Omhoog",
+      "down": "Omlaag",
+      "left": "Links",
+      "right": "Rechts"
+    }
   }
 }

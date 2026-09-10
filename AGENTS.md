@@ -126,7 +126,7 @@ The codebase follows a separation of concerns pattern, linked via `scripts/main.
 - **Overlay UX regression**: Verify `.active` CSS transitions, `inert` focus trap on open, first-button auto-focus, and `inert` removal on close.
 - **Init failure regression**: Force an init error and verify `#error-screen` shows with i18n'd message and Retry button works.
 - **Text particles regression**: Verify `emitText` floating score text appears on item pickup.
-- **Audio duck regression**: Verify music is not permanently ducked after restart or any overlay close path.
+- **Audio duck regression**: Verify music is not permanently ducked after restart or any overlay close path, and remains ducked while moving between Game Over and Death Review.
 
 ## ⚠️ Critical Invariants & Pitfalls
 
@@ -140,15 +140,16 @@ These are easy-to-miss requirements. Violating them causes subtle, hard-to-debug
 - **`DYING → PAUSED` is explicitly blocked** in `StateMachine`. Do not add this transition.
 - If adding new state transitions, test that DYING is not interrupted.
 
-### Audio Ducking Must Be Cleared on All Dismissal Paths
+### Audio Ducking Must Be Cleared on All Result-Flow Exit Paths
 
 - `audio.duck(true)` is called on death entry (in `_handleGameOver`).
-- `audio.duck(false)` MUST be called on **every** path that returns to gameplay or dismisses the game-over/time-up screen:
+- `audio.duck(false)` MUST be called on **every** path that leaves the result flow and returns to gameplay/title or fully dismisses the result overlay:
   - `game._initializeGameState()` (reset/restart)
   - Game-over close button, time-up close button
-  - Escape key from overlay
+  - Escape key that closes the result flow
   - State transitions from `PAUSED`/`DYING` back to `PLAYING`
-- **If you add a new way to dismiss game-over/time-up overlays, you MUST add `audio.duck(false)`.** Forgetting this leaves audio permanently ducked (quiet).
+- Moving between `game-over-screen` and `death-review-screen` is **not** a result-flow dismissal. Review playback remains in `GAME_OVER`, so death audio stays ducked while entering Review and while returning to the Game Over result.
+- **If you add a new way to leave the game-over/time-up result flow, you MUST add `audio.duck(false)`.** Forgetting this leaves audio permanently ducked (quiet).
 
 ### Overlay `inert` Focus Trap
 
@@ -156,6 +157,7 @@ These are easy-to-miss requirements. Violating them causes subtle, hard-to-debug
 - When hidden via `_hideScreen()`, inert is removed **only if NO other overlay is still active** (checked via `overlayIds` list).
 - **Always use `_showScreen()`/`_hideScreen()`** for overlays. Direct DOM manipulation of `.active` class will break inert state.
 - New overlays MUST be added to the `overlayIds` array in `main.js`.
+- Shared overlay code owns autofocus. Overlay controllers must not schedule a second delayed focus that competes with `_showScreen()`.
 
 ### `waitingForInput` State
 
@@ -166,6 +168,16 @@ These are easy-to-miss requirements. Violating them causes subtle, hard-to-debug
 
 - Any new `.js` module imported by `scripts/main.js` (or its static dependency tree) MUST be added to `CORE_ASSETS` in `sw.js`, or the app will break offline.
 - Same for new locale files added to `i18n/`.
+
+### Death Review Replay Semantics
+
+- The review is a bounded, in-memory snapshot only. Do not persist it, place it in URLs, or treat it as score verification.
+- Capture the attempted move and safe-direction mask before `Snake.tick()`; fatal wall/self movement does not mutate the body.
+- Each recorded frame captures the active snake skin so a mid-run visual change replays with the same appearance that was shown live.
+- Review playback stays in `GAME_OVER` and uses its own `requestAnimationFrame`. It must never advance game time, item timers, RNG, scores, or daily-run counters.
+- Keep `death-review-screen` in the shared overlay list and use the existing show/hide helpers so `inert` and focus remain correct.
+- Gameplay turn assist intentionally uses `snake.inspectMove()` and preserves its historic one-step map/body behavior; review analysis may additionally classify lethal poison as unsafe. Do not unify those calls without deliberately changing gameplay.
+- New review modules and styles must remain in `sw.js` `CORE_ASSETS`.
 
 ## 📦 Commit & PR Guidelines
 

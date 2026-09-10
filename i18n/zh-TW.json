@@ -210,5 +210,31 @@
     "rulesLocked": "每日挑戰規則已鎖定。",
     "rules": "{map} · {speed} · 毒藥：{poison}",
     "shareUnavailable": "目前環境無法建立或驗證分享連結。請使用 HTTPS 或 localhost 開啟遊戲。"
+  },
+  "review": {
+    "title": "失誤回顧",
+    "open": "查看失誤",
+    "play": "播放",
+    "pause": "暫停",
+    "replay": "重新播放",
+    "previousFrame": "上一步",
+    "nextFrame": "下一步",
+    "backToResult": "回到結果",
+    "restartCurrent": "重啟本局",
+    "restartRandom": "隨機參數重新開局",
+    "timeline": "回顧時間軸",
+    "timeBeforeCollision": "距離碰撞 {seconds} 秒",
+    "lastDirection": "最後方向：{direction}。",
+    "safeDirections": "可立即避開碰撞的方向：{directions}。",
+    "noSafeDirection": "當時已沒有可立即避開碰撞的方向。",
+    "collisionMarker": "碰撞位置",
+    "safeMarker": "可立即避開的方向",
+    "unavailable": "本局沒有可供回顧的紀錄。",
+    "direction": {
+      "up": "上",
+      "down": "下",
+      "left": "左",
+      "right": "右"
+    }
   }
 }

@@ -210,5 +210,31 @@
     "rulesLocked": "দৈনিক চ্যালেঞ্জের নিয়ম লক করা আছে।",
     "rules": "{map} · {speed} · বিষ: {poison}",
     "shareUnavailable": "এই পরিবেশে শেয়ার লিঙ্ক তৈরি বা যাচাই করা যায় না। HTTPS বা localhost দিয়ে গেমটি খুলুন।"
+  },
+  "review": {
+    "title": "ভুলের পর্যালোচনা",
+    "open": "ভুলটি দেখুন",
+    "play": "চালান",
+    "pause": "বিরতি",
+    "replay": "আবার চালান",
+    "previousFrame": "আগের ধাপ",
+    "nextFrame": "পরের ধাপ",
+    "backToResult": "ফলাফলে ফিরুন",
+    "restartCurrent": "রানটি আবার শুরু করুন",
+    "restartRandom": "এলোমেলো করে আবার শুরু করুন",
+    "timeline": "রিপ্লে সময়রেখা",
+    "timeBeforeCollision": "সংঘর্ষের {seconds} সেকেন্ড আগে",
+    "lastDirection": "শেষ দিক: {direction}।",
+    "safeDirections": "পরের সংঘর্ষ তাৎক্ষণিক এড়ানো যেত: {directions}।",
+    "noSafeDirection": "কোনো দিকই তাৎক্ষণিক সংঘর্ষ এড়াতে পারত না।",
+    "collisionMarker": "সংঘর্ষের স্থান",
+    "safeMarker": "তাৎক্ষণিক নিরাপদ দিক",
+    "unavailable": "এই রানের কোনো ভুলের পর্যালোচনা নেই।",
+    "direction": {
+      "up": "উপরে",
+      "down": "নিচে",
+      "left": "বামে",
+      "right": "ডানে"
+    }
   }
 }

@@ -210,5 +210,31 @@
     "rulesLocked": "デイリーチャレンジのルールは固定されています。",
     "rules": "{map} · {speed} · 毒: {poison}",
     "shareUnavailable": "この環境では共有リンクを作成または検証できません。HTTPS または localhost でゲームを開いてください。"
+  },
+  "review": {
+    "title": "ミスの振り返り",
+    "open": "ミスを振り返る",
+    "play": "再生",
+    "pause": "一時停止",
+    "replay": "もう一度再生",
+    "previousFrame": "前の手順",
+    "nextFrame": "次の手順",
+    "backToResult": "結果に戻る",
+    "restartCurrent": "このプレイを再開",
+    "restartRandom": "ランダム設定で再開",
+    "timeline": "リプレイのタイムライン",
+    "timeBeforeCollision": "衝突まで {seconds} 秒",
+    "lastDirection": "最後の方向：{direction}。",
+    "safeDirections": "次の衝突をすぐ回避できた方向：{directions}。",
+    "noSafeDirection": "衝突をすぐ回避できる方向はありませんでした。",
+    "collisionMarker": "衝突位置",
+    "safeMarker": "すぐ安全な方向",
+    "unavailable": "このプレイには振り返り記録がありません。",
+    "direction": {
+      "up": "上",
+      "down": "下",
+      "left": "左",
+      "right": "右"
+    }
   }
 }

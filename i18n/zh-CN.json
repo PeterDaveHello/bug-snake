@@ -210,5 +210,31 @@
     "rulesLocked": "每日挑战规则已锁定。",
     "rules": "{map} · {speed} · 毒药：{poison}",
     "shareUnavailable": "当前环境无法创建或验证分享链接。请使用 HTTPS 或 localhost 打开游戏。"
+  },
+  "review": {
+    "title": "失误回顾",
+    "open": "查看失误",
+    "play": "播放",
+    "pause": "暂停",
+    "replay": "重新播放",
+    "previousFrame": "上一步",
+    "nextFrame": "下一步",
+    "backToResult": "返回结果",
+    "restartCurrent": "重启本局",
+    "restartRandom": "随机参数重新开局",
+    "timeline": "回顾时间轴",
+    "timeBeforeCollision": "距离碰撞 {seconds} 秒",
+    "lastDirection": "最后方向：{direction}。",
+    "safeDirections": "可立即避开碰撞的方向：{directions}。",
+    "noSafeDirection": "当时已没有可立即避开碰撞的方向。",
+    "collisionMarker": "碰撞位置",
+    "safeMarker": "可立即避开的方向",
+    "unavailable": "本局没有可供回顾的记录。",
+    "direction": {
+      "up": "上",
+      "down": "下",
+      "left": "左",
+      "right": "右"
+    }
   }
 }

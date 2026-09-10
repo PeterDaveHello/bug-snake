@@ -210,5 +210,31 @@
     "rulesLocked": "Zasady codziennego wyzwania są zablokowane.",
     "rules": "{map} · {speed} · Trucizna: {poison}",
     "shareUnavailable": "W tym środowisku nie można tworzyć ani weryfikować linków udostępniania. Otwórz grę przez HTTPS lub localhost."
+  },
+  "review": {
+    "title": "Analiza błędu",
+    "open": "Zobacz błąd",
+    "play": "Odtwórz",
+    "pause": "Pauza",
+    "replay": "Odtwórz ponownie",
+    "previousFrame": "Poprzedni krok",
+    "nextFrame": "Następny krok",
+    "backToResult": "Wróć do wyniku",
+    "restartCurrent": "Uruchom rundę ponownie",
+    "restartRandom": "Losuj i uruchom ponownie",
+    "timeline": "Oś czasu powtórki",
+    "timeBeforeCollision": "{seconds} s przed kolizją",
+    "lastDirection": "Ostatni kierunek: {direction}.",
+    "safeDirections": "Następną kolizję można było od razu ominąć: {directions}.",
+    "noSafeDirection": "Żaden kierunek nie pozwalał od razu uniknąć kolizji.",
+    "collisionMarker": "Miejsce kolizji",
+    "safeMarker": "Natychmiast bezpieczne kierunki",
+    "unavailable": "Dla tej rundy nie ma analizy błędu.",
+    "direction": {
+      "up": "Góra",
+      "down": "Dół",
+      "left": "Lewo",
+      "right": "Prawo"
+    }
   }
 }

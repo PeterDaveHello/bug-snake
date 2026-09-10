@@ -210,5 +210,31 @@
     "rulesLocked": "Daily challenge rules are locked.",
     "rules": "{map} · {speed} · Poison: {poison}",
     "shareUnavailable": "This environment cannot create or verify share links. Open the game over HTTPS or localhost."
+  },
+  "review": {
+    "title": "Mistake Review",
+    "open": "Review Mistake",
+    "play": "Play",
+    "pause": "Pause",
+    "replay": "Replay",
+    "previousFrame": "Previous Step",
+    "nextFrame": "Next Step",
+    "backToResult": "Back to Result",
+    "restartCurrent": "Restart Run",
+    "restartRandom": "Randomize & Restart",
+    "timeline": "Replay timeline",
+    "timeBeforeCollision": "{seconds}s before collision",
+    "lastDirection": "Final direction: {direction}.",
+    "safeDirections": "Could immediately avoid the next collision: {directions}.",
+    "noSafeDirection": "No direction could immediately avoid the collision.",
+    "collisionMarker": "Collision point",
+    "safeMarker": "Immediately safe directions",
+    "unavailable": "No mistake review is available for this run.",
+    "direction": {
+      "up": "Up",
+      "down": "Down",
+      "left": "Left",
+      "right": "Right"
+    }
   }
 }

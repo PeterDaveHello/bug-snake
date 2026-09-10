@@ -56,4 +56,16 @@ assert(!hasTrash(), 'Danger item expires after enough active gameplay time');
 manager.clear();
 assert(manager.dangerTimer === 0, 'Clearing items resets the active-play danger clock');
 
+manager.tick(Number.MAX_VALUE);
+assert(
+  Number.isFinite(manager.dangerTimer) && manager.dangerTimer === Number.MAX_SAFE_INTEGER,
+  'Extreme finite elapsed time is clamped to a finite active-play clock'
+);
+
+manager.tick(Number.MAX_VALUE);
+assert(
+  manager.dangerTimer === Number.MAX_SAFE_INTEGER,
+  'Repeated extreme elapsed time cannot overflow the active-play clock'
+);
+
 console.log(`\nItem manager timing tests: ${passed} passed`);

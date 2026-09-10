@@ -210,5 +210,31 @@
     "rulesLocked": "กติกาการท้าทายรายวันถูกล็อกไว้",
     "rules": "{map} · {speed} · พิษ: {poison}",
     "shareUnavailable": "สภาพแวดล้อมนี้ไม่สามารถสร้างหรือตรวจสอบลิงก์แชร์ได้ โปรดเปิดเกมผ่าน HTTPS หรือ localhost"
+  },
+  "review": {
+    "title": "ทบทวนความผิดพลาด",
+    "open": "ดูความผิดพลาด",
+    "play": "เล่น",
+    "pause": "หยุดชั่วคราว",
+    "replay": "เล่นซ้ำ",
+    "previousFrame": "ขั้นก่อนหน้า",
+    "nextFrame": "ขั้นถัดไป",
+    "backToResult": "กลับไปผลลัพธ์",
+    "restartCurrent": "เริ่มรอบใหม่",
+    "restartRandom": "สุ่มค่าและเริ่มใหม่",
+    "timeline": "เส้นเวลาการเล่นซ้ำ",
+    "timeBeforeCollision": "ก่อนชน {seconds} วินาที",
+    "lastDirection": "ทิศสุดท้าย: {direction}",
+    "safeDirections": "ทิศที่หลบการชนถัดไปได้ทันที: {directions}",
+    "noSafeDirection": "ไม่มีทิศใดหลบการชนได้ทันที",
+    "collisionMarker": "จุดชน",
+    "safeMarker": "ทิศที่ปลอดภัยทันที",
+    "unavailable": "ไม่มีบันทึกทบทวนสำหรับรอบนี้",
+    "direction": {
+      "up": "ขึ้น",
+      "down": "ลง",
+      "left": "ซ้าย",
+      "right": "ขวา"
+    }
   }
 }
