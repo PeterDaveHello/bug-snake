@@ -44,6 +44,8 @@ export class Renderer {
     }
     /** Reusable scratch object for _lerpSegment to avoid per-segment allocation */
     this._lerpResult = { x: 0, y: 0 };
+    /** @type {number | null} */
+    this._resizeRafId = null;
 
     this.colors = {
       background: '#030309',
@@ -56,7 +58,15 @@ export class Renderer {
       path: 'rgba(76, 201, 240, 0.3)'
     };
 
-    window.addEventListener('resize', () => this.resize());
+    window.addEventListener('resize', () => {
+      // Coalesce resize event bursts (e.g. window drags) into at most one
+      // canvas reallocation + tile/sprite cache rebuild per frame.
+      if (this._resizeRafId !== null) return;
+      this._resizeRafId = requestAnimationFrame(() => {
+        this._resizeRafId = null;
+        this.resize();
+      });
+    });
     this.resize();
   }
 

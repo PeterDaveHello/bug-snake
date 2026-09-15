@@ -17,6 +17,8 @@ class GameApp {
     this._panelAutoPaused = false;
     this._aboutReturnToTitle = false;
     this._errorRetryBound = false;
+    /** @type {number | null} */
+    this._legendResizeRafId = null;
     this._overlayKeyHandler = this._handleOverlayKeydown.bind(this);
     this._panelLoadErrorHandler = this._handlePanelLoadError.bind(this);
   }
@@ -258,7 +260,18 @@ class GameApp {
 
     game.init('game-canvas');
     game.renderer.renderLegendIcons();
-    window.addEventListener('resize', () => game.renderer.renderLegendIcons());
+    window.addEventListener('resize', () => {
+      // Coalesce resize bursts and skip while the legend is hidden — hidden
+      // icons are re-rendered on panel activation anyway, and each redraw
+      // forces a getBoundingClientRect layout read per icon.
+      if (this._legendResizeRafId !== null) return;
+      this._legendResizeRafId = requestAnimationFrame(() => {
+        this._legendResizeRafId = null;
+        if (this._isLegendVisible()) {
+          game.renderer.renderLegendIcons();
+        }
+      });
+    });
 
     const panelModule = await import('./ui/panel-manager.js').catch(this._panelLoadErrorHandler);
     if (panelModule?.PanelManager) {
