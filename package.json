@@ -38,7 +38,7 @@
     "url": "https://github.com/PeterDaveHello/bug-snake.git"
   },
   "devDependencies": {
-    "@types/node": "^25.0.9",
+    "@types/node": "^26.0.0",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "html-validate": "^10.6.0",
