@@ -44,7 +44,7 @@
     "html-validate": "^10.6.0",
     "markdownlint-cli2": "^0.21.0",
     "prettier": "^3.6.2",
-    "stylelint": "^17.0.0",
+    "stylelint": "^18.0.0",
     "stylelint-config-recommended": "^18.0.0",
     "typescript": "^5.3.3"
   }
